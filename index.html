@@ -256,14 +256,14 @@ table.mass tr.today td{color:#fbe7c4}
   </svg>
   <h1 class="wordmark">바티칸 성당</h1>
   <p class="place">ONLINE · BASILICA</p>
-  <p class="motto">쿠폴라의 빛 아래 말없이 함께 머무는 곳<br>피에타 앞에 초 하나 밝히고, 잠시 쉬어 가세요</p>
+  <p class="motto">십자고상 아래 말없이 함께 머무는 곳<br>성모님과 피에타 앞에 초 하나 밝히고, 잠시 쉬어 가세요</p>
   <button id="enter" class="enter" aria-label="성당에 들어가기" disabled>
     <svg viewBox="0 0 24 24" class="i"><g transform="rotate(-38 12 12)"><circle cx="12" cy="5" r="2.6"/><path d="M12 7.6v13M12 17.5h2.6M12 20h2.2"/></g><g transform="rotate(38 12 12)"><circle cx="12" cy="5" r="2.6"/><path d="M12 7.6v13M12 17.5h-2.6M12 20h-2.2"/></g></svg>
   </button>
   <p class="enter-label" id="enter-label">성전을 준비하고 있어요</p>
   <div class="loading-dot" id="loading-dot"></div>
   <p class="boot-fail" id="boot-fail">이 창(미리보기)에서는 성당이 열리지 않아요.<br>크롬·엣지 같은 브라우저에서 파일을 직접 열거나, 웹 주소로 접속해 주세요.<br><small style="color:var(--ink-dim)">인터넷 연결이 필요해요.</small></p>
-  <p class="fine">성 베드로 대성전에서 영감을 받아 새로 지은 비공식 온라인 기도 공간입니다.<br>교황청·특정 성당과 관계가 없으며, 미사 참례를 대신하지 않아요.</p>
+  <p class="fine">로마의 대성전들에서 영감을 받아 새로 지은 비공식 온라인 기도 공간입니다.<br>교황청·특정 성당과 관계가 없으며, 미사 참례를 대신하지 않아요.</p>
 </main>
 
 <!-- ============ HUD ============ -->
@@ -351,7 +351,7 @@ table.mass tr.today td{color:#fbe7c4}
   <h3>조작 방법</h3>
   <p>바닥 클릭 · WASD · 방향키로 이동<br>드래그로 둘러보기 · 휠로 확대/축소<br>장의자를 누르면 앉고, 앉은 채로 1을 누르면 무릎 꿇고 기도해요<br>성모상 · 봉헌초 · 십자가의 길 · 성수대를 눌러 보세요<br>1 기도 · 2 초 봉헌 · 3 묵주 · 4 평화의 인사 · 5 미사포 · 6 마음 내려놓기</p>
   <h3>이 공간에 대해</h3>
-  <p>바티칸 성 베드로 대성전의 분위기를 빌려 새로 지은 공간이에요. 금빛 격자 궁륭, 둥근 천창(오쿨루스)이 열린 쿠폴라, 꼬인 청동 기둥이 받치는 발다키노 아래의 제대, 성령의 비둘기가 빛나는 영광의 창, 오른편 경당의 피에타를 담았어요. 묵주기도를 당부하신 파티마의 성모(잠원동성당 주보)도 제대 옆에 모셨어요.</p>
+  <p>로마의 대성전들(성 베드로, 산타 마리아 마조레)에서 영감을 받아 새로 지은 3랑식 성당이에요. 이오니아식 기둥이 늘어선 신자석과 양쪽 회랑, 금빛 격자 천장과 모자이크, 성인들의 스테인드글라스와 장미창, 개선 아치 아래 높이 걸린 십자고상, 반암 기둥 발다키노 아래 제대, 감실과 성체등, 영성체 난간을 담았어요. 회랑에는 파티마의 성모·성 요셉 제대, 예수 성심상, 성 베드로 청동 좌상, 고해소, 세례대, 그리고 유리 너머 피에타 경당이 있어요.</p>
   <p>교황청·특정 본당과 관계없는 비공식 공간이에요. 모든 형상은 단순한 도형으로 새로 빚었고, 소리는 브라우저에서 직접 합성해요.</p>
 </section>
 
@@ -626,36 +626,109 @@ function addCollider(x0, x1, z0, z1) { colliders.push({ x0: Math.min(x0, x1), x1
 function markPick(obj, action, data = {}) { obj.traverse(o => { o.userData.pick = { action, ...data }; }); pickables.push(obj); }
 
 /* =========================================================
-   BASILICA (성 베드로 대성전에서 영감)
+   BASILICA v2 — 로마 대성전(산타 마리아 마조레·성 베드로)에서 영감을 받은 3랑식 성당
    ========================================================= */
-const W = 12, ZF = -20, ZB = 20, WH = 9, RH = WH + W, XZ = -11;
-const PEW_ROWS = 14, PEW_Z0 = -9, PEW_DZ = 1.6, PX0 = 1.6, PX1 = 8.2;
-const BOUNDS = { x0: -11.65, x1: 11.65, z0: -11.9, z1: 19.6 };
-const skyMats = [M.sky], winMats = [M.win];
-const shafts = [];
-const OCULUS = new THREE.Vector3(0, RH + 6.3, -15.5);
+const W = 12, ZF = -20, ZB = 20, NX = 7, NH = 14, AH = 7;          // outer half-width, nave half-width, nave height, aisle height
+const PEW_ROWS = 14, PEW_Z0 = -9, PEW_DZ = 1.6, PX0 = 1.1, PX1 = 6.2;
+const BOUNDS = { x0: -11.6, x1: 11.6, z0: -11.1, z1: 19.6 };
+const COLS_Z = [-10, -5.5, -1, 3.5, 8, 12.5, 17];
+const skyMats = [M.sky], winMats = [M.win], glassMats = [M.glass];
+const shafts = [], decoFlames = [];
+const OCULUS = new THREE.Vector3(0, 13.2, -9);
 
-/* extra textures */
-C.mfloor = makeCanvas(512, 512, (g, w, h) => {
+/* ---------- canvases ---------- */
+function tesserae(g, x0, y0, w, h, cols, s = 8) { for (let y = y0; y < y0 + h; y += s) for (let x = x0; x < x0 + w; x += s) { g.fillStyle = pick(cols); g.fillRect(x + .6, y + .6, s - 1.2, s - 1.2); } }
+const GOLD = ['#d9a93a', '#e8c15a', '#c8942c', '#f0d27a', '#dcae46'];
+function fitTex(t, wd, ht) { t.repeat.set(1 / wd, 1 / ht); t.offset.set(.5, 0); return t; }
+function figure(g, cx, top, sc, robe, mantle, opts = {}) {
+  g.save(); g.translate(cx, top); g.scale(sc, sc);
+  g.fillStyle = opts.halo || '#f6d34a'; g.beginPath(); g.arc(0, 0, 40, 0, 7); g.fill();
+  g.fillStyle = '#f1dcc2'; g.beginPath(); g.ellipse(0, 4, 22, 27, 0, 0, 7); g.fill();
+  if (opts.veil) { g.fillStyle = opts.veil; g.beginPath(); g.moveTo(-26, 30); g.quadraticCurveTo(-30, -26, 0, -28); g.quadraticCurveTo(30, -26, 26, 30); g.lineTo(18, 30); g.quadraticCurveTo(20, -10, 0, -14); g.quadraticCurveTo(-20, -10, -18, 30); g.fill(); }
+  g.fillStyle = robe; g.beginPath(); g.moveTo(-20, 34); g.quadraticCurveTo(-46, 46, -54, 120); g.lineTo(-62, 300); g.lineTo(62, 300); g.lineTo(54, 120); g.quadraticCurveTo(46, 46, 20, 34); g.fill();
+  g.fillStyle = mantle; g.beginPath(); g.moveTo(-24, 38); g.quadraticCurveTo(-58, 60, -62, 300); g.lineTo(-14, 300); g.quadraticCurveTo(-2, 160, 34, 60); g.fill();
+  g.fillStyle = '#f1dcc2'; g.beginPath(); g.ellipse(-6, 120, 9, 12, .3, 0, 7); g.ellipse(14, 112, 9, 12, -.3, 0, 7); g.fill();
+  if (opts.sym === 'key') { g.strokeStyle = '#f6d34a'; g.lineWidth = 7; g.beginPath(); g.moveTo(20, 100); g.lineTo(46, 220); g.stroke(); g.beginPath(); g.arc(18, 92, 12, 0, 7); g.stroke(); }
+  if (opts.sym === 'lily') { g.strokeStyle = '#3f8a4a'; g.lineWidth = 5; g.beginPath(); g.moveTo(14, 112); g.lineTo(30, 20); g.stroke(); g.fillStyle = '#fff'; for (let k = 0; k < 3; k++) { g.beginPath(); g.ellipse(30 + k * 6 - 6, 22 + k * 14, 8, 12, 0, 0, 7); g.fill(); } }
+  if (opts.sym === 'heart') { g.fillStyle = '#e02828'; g.beginPath(); g.arc(-6, 80, 9, 0, 7); g.arc(6, 80, 9, 0, 7); g.fill(); g.beginPath(); g.moveTo(-15, 84); g.lineTo(0, 102); g.lineTo(15, 84); g.fill(); g.fillStyle = '#ffcc33'; g.beginPath(); g.moveTo(-5, 70); g.lineTo(0, 54); g.lineTo(5, 70); g.fill(); }
+  if (opts.sym === 'child') { g.fillStyle = '#f6d34a'; g.beginPath(); g.arc(0, 96, 22, 0, 7); g.fill(); g.fillStyle = '#f1dcc2'; g.beginPath(); g.arc(0, 98, 13, 0, 7); g.fill(); g.fillStyle = '#f5f0e6'; g.beginPath(); g.ellipse(0, 140, 18, 30, 0, 0, 7); g.fill(); }
+  g.restore();
+}
+function leadGrid(g, w, h, cw, jit, cols) {
+  const nx = Math.ceil(w / cw), ny = Math.ceil(h / cw), P = [];
+  for (let j = 0; j <= ny; j++) { P[j] = []; for (let i = 0; i <= nx; i++) P[j][i] = [i * cw + (i > 0 && i < nx ? rand(-jit, jit) : 0), j * cw + (j > 0 && j < ny ? rand(-jit, jit) : 0)]; }
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) { g.fillStyle = pick(cols); g.beginPath(); g.moveTo(...P[j][i]); g.lineTo(...P[j][i + 1]); g.lineTo(...P[j + 1][i + 1]); g.lineTo(...P[j + 1][i]); g.closePath(); g.fill(); }
+  return P;
+}
+function strokeGrid(g, P) { g.strokeStyle = '#17131a'; g.lineWidth = 3; for (const row of P) { g.beginPath(); g.moveTo(...row[0]); row.forEach(p => g.lineTo(...p)); g.stroke(); } for (let i = 0; i < P[0].length; i++) { g.beginPath(); g.moveTo(...P[0][i]); P.forEach(r => g.lineTo(...r[i])); g.stroke(); } }
+const SAINTS = [
+  { bg: ['#123f9e', '#1d6fd1', '#0a2e6e', '#2b86e0'], robe: '#f2efe6', mantle: '#1d4fb8', veil: '#1d4fb8', sym: 'child', name: '성모 마리아' },
+  { bg: ['#7a1420', '#a8202e', '#5e0f18', '#c23a3a'], robe: '#e8b830', mantle: '#1d4fb8', sym: 'key', name: '성 베드로' },
+  { bg: ['#1d5a3a', '#2f7d4f', '#13402a', '#3e9a62'], robe: '#7a5a2a', mantle: '#8a3a1a', sym: 'lily', name: '성 요셉' },
+  { bg: ['#4a2a7a', '#6a3fa8', '#2e1a55', '#8a5cc8'], robe: '#f2efe6', mantle: '#c8202e', sym: 'heart', name: '예수 성심' },
+  { bg: ['#123f9e', '#1d6fd1', '#0a2e6e', '#2b86e0'], robe: '#c8202e', mantle: '#2f7d4f', sym: 'none', name: '성 김대건 안드레아' },
+  { bg: ['#7a1420', '#a8202e', '#5e0f18', '#c23a3a'], robe: '#f2efe6', mantle: '#6a3fa8', veil: '#f2efe6', sym: 'none', name: '성녀 데레사' },
+];
+function saintGlass(i) {
+  const s = SAINTS[i % SAINTS.length];
+  return makeCanvas(256, 640, (g, w, h) => {
+    const P = leadGrid(g, w, h, 40, 10, s.bg);
+    figure(g, w / 2, 170, .78, s.robe, s.mantle, { veil: s.veil, sym: s.sym });
+    strokeGrid(g, P);
+    g.strokeStyle = '#17131a'; g.lineWidth = 5; g.beginPath(); g.arc(w / 2, 170, 31, 0, 7); g.stroke();
+    g.fillStyle = '#e0b030'; g.fillRect(0, 0, 14, h); g.fillRect(w - 14, 0, 14, h); g.fillRect(0, h - 14, w, 14);
+    for (let y = 20; y < h; y += 34) { g.fillStyle = y % 68 ? '#c8202e' : '#1d6fd1'; g.fillRect(3, y, 8, 18); g.fillRect(w - 11, y, 8, 18); }
+    g.fillStyle = 'rgba(255,240,200,.95)'; g.fillRect(30, h - 78, w - 60, 40); g.fillStyle = '#3a2410'; g.font = '600 22px "Noto Serif KR",serif'; g.textAlign = 'center'; g.fillText(s.name, w / 2, h - 50);
+  });
+}
+C.rose = makeCanvas(512, 512, (g, w, h) => {
+  g.translate(256, 256); g.fillStyle = '#0a2e6e'; g.beginPath(); g.arc(0, 0, 256, 0, 7); g.fill();
+  const cols = ['#c8202e', '#1d6fd1', '#e8b830', '#2f7d4f', '#6a3fa8', '#e05a2a'];
+  for (let ring = 0; ring < 3; ring++) { const r0 = 70 + ring * 62, r1 = r0 + 58, n = 12 + ring * 6; for (let i = 0; i < n; i++) { const a0 = i / n * Math.PI * 2, a1 = (i + 1) / n * Math.PI * 2; g.fillStyle = cols[(i + ring) % cols.length]; g.beginPath(); g.arc(0, 0, r1, a0, a1); g.arc(0, 0, r0, a1, a0, true); g.closePath(); g.fill(); g.strokeStyle = '#17131a'; g.lineWidth = 4; g.stroke(); } }
+  for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; g.fillStyle = '#f6d34a'; g.beginPath(); g.arc(Math.cos(a) * 160, Math.sin(a) * 160, 16, 0, 7); g.fill(); }
+  g.fillStyle = '#f6e9b8'; g.beginPath(); g.arc(0, 0, 66, 0, 7); g.fill(); g.strokeStyle = '#17131a'; g.lineWidth = 6; g.stroke();
+  g.fillStyle = '#fff'; g.beginPath(); g.moveTo(-44, -2); g.quadraticCurveTo(-24, -36, 0, -8); g.quadraticCurveTo(24, -36, 44, -2); g.quadraticCurveTo(16, -2, 7, 5); g.quadraticCurveTo(14, 22, 4, 30); g.lineTo(0, 20); g.lineTo(-4, 30); g.quadraticCurveTo(-14, 22, -7, 5); g.quadraticCurveTo(-16, -2, -44, -2); g.fill();
+  g.lineWidth = 10; g.strokeStyle = '#2a2018'; g.beginPath(); g.arc(0, 0, 252, 0, 7); g.stroke();
+});
+function mosaicPanel(i) {
+  return makeCanvas(512, 320, (g, w, h) => {
+    tesserae(g, 0, 0, w, h, GOLD, 8);
+    g.fillStyle = '#1b3f86'; g.fillRect(0, h - 70, w, 70); tesserae(g, 0, h - 70, w, 70, ['#1b3f86', '#244c9c', '#173672'], 8);
+    const a = SAINTS[(i * 2) % SAINTS.length], b = SAINTS[(i * 2 + 1) % SAINTS.length];
+    figure(g, w * .3, 70, .62, a.robe, a.mantle, { veil: a.veil, sym: a.sym });
+    figure(g, w * .7, 70, .62, b.robe, b.mantle, { veil: b.veil, sym: b.sym });
+    g.strokeStyle = '#7a1420'; g.lineWidth = 14; g.strokeRect(7, 7, w - 14, h - 14); g.strokeStyle = '#f2efe6'; g.lineWidth = 4; g.strokeRect(16, 16, w - 32, h - 32);
+  });
+}
+C.apse = makeCanvas(1024, 512, (g, w, h) => {
+  tesserae(g, 0, 0, w, h, GOLD, 8);
+  for (let i = 0; i < 40; i++) { g.fillStyle = 'rgba(255,255,255,.5)'; g.fillRect(rand(0, w), rand(0, h * .5), 3, 3); }
+  const cx = w / 2, cy = h * .62;
+  g.save(); g.beginPath(); g.arc(cx, cy, 165, 0, 7); g.clip(); tesserae(g, cx - 168, cy - 168, 336, 336, ['#163a80', '#1d4aa0', '#123070'], 8); g.restore();
+  g.strokeStyle = '#f2efe6'; g.lineWidth = 10; g.beginPath(); g.arc(cx, cy, 168, 0, 7); g.stroke(); g.strokeStyle = '#a8202e'; g.lineWidth = 6; g.beginPath(); g.arc(cx, cy, 178, 0, 7); g.stroke();
+  for (let i = 0; i < 26; i++) { const a = rand(0, 7), r = rand(20, 150); g.fillStyle = '#f6d34a'; g.font = '14px serif'; g.fillText('✦', cx + Math.cos(a) * r, cy + Math.sin(a) * r); }
+  g.fillStyle = '#c8942c'; g.fillRect(cx - 70, cy + 40, 140, 70); // throne
+  figure(g, cx, cy - 92, .7, '#a8202e', '#1d4aa0', { veil: '#1d4aa0', sym: 'child' });
+  for (const s of [-1, 1]) { figure(g, cx + s * 300, cy - 40, .55, '#f2efe6', s < 0 ? '#2f7d4f' : '#a8202e', { sym: s < 0 ? 'key' : 'lily' }); }
+  for (const s of [-1, 1]) { g.fillStyle = '#2f7d4f'; g.save(); g.translate(cx + s * 440, h - 10); for (let k = 0; k < 7; k++) { g.rotate(s * .32); g.beginPath(); g.ellipse(0, -110, 10, 60, 0, 0, 7); g.fill(); } g.restore(); g.fillStyle = '#7a5a2a'; g.fillRect(cx + s * 440 - 6, h - 120, 12, 120); }
+  g.fillStyle = '#7a1420'; g.fillRect(0, h - 26, w, 26); g.fillStyle = '#f2efe6'; for (let x = 0; x < w; x += 24) g.fillRect(x + 4, h - 18, 12, 10);
+});
+C.archFace = makeCanvas(1024, 1024, (g, w, h) => {
+  tesserae(g, 0, 0, w, h, GOLD, 10);
+  g.fillStyle = '#1b3f86'; g.fillRect(0, 0, w, 108); tesserae(g, 0, 0, w, 108, ['#1b3f86', '#244c9c'], 10);
+  g.fillStyle = '#fff5dc'; g.font = '600 60px "Noto Serif KR",serif'; g.textAlign = 'center'; g.fillText('AVE MARIA · GRATIA PLENA', w / 2, 76);
+  for (const u of [.07, .93]) { const x = u * w, y = h * (1 - .7); g.fillStyle = '#7a1420'; g.beginPath(); g.arc(x, y, 58, 0, 7); g.fill(); g.strokeStyle = '#f2efe6'; g.lineWidth = 6; g.stroke(); g.fillStyle = '#f6d34a'; g.font = '700 62px serif'; g.fillText(u < .5 ? 'Α' : 'Ω', x, y + 22); }
+});
+C.stars = makeCanvas(256, 256, (g, w, h) => { g.fillStyle = '#1c2e66'; g.fillRect(0, 0, w, h); speckle(g, w, h, 900, .25, ['#2a3f80', '#162452'], 3); g.fillStyle = '#f0c95a'; for (const [x, y] of [[40, 50], [170, 30], [110, 130], [220, 170], [60, 200], [180, 240]]) { g.save(); g.translate(x, y); for (let k = 0; k < 4; k++) { g.rotate(Math.PI / 4); g.fillRect(-1.5, -9, 3, 18); } g.restore(); } });
+C.mfloor2 = makeCanvas(512, 512, (g, w, h) => {
   g.fillStyle = '#ebe4d6'; g.fillRect(0, 0, w, h);
-  for (let i = 0; i < 26; i++) { g.strokeStyle = `rgba(120,108,92,${rand(.08, .22)})`; g.lineWidth = rand(.5, 2); g.beginPath(); let x = rand(0, w), y = rand(0, h); g.moveTo(x, y); for (let k = 0; k < 5; k++) { x += rand(-90, 90); y += rand(-90, 90); g.lineTo(x, y); } g.stroke(); }
-  g.fillStyle = '#c9ad78'; g.fillRect(0, 0, w, 34); g.fillRect(0, h - 34, w, 34); g.fillRect(0, 0, 34, h); g.fillRect(w - 34, 0, 34, h);
-  g.strokeStyle = '#7c6440'; g.lineWidth = 3; g.strokeRect(34, 34, w - 68, h - 68); g.strokeRect(2, 2, w - 4, h - 4);
-  g.fillStyle = '#2f5a46'; g.beginPath(); g.arc(w / 2, h / 2, 118, 0, 7); g.fill();
-  const pg = g.createRadialGradient(w / 2 - 30, h / 2 - 30, 10, w / 2, h / 2, 132); pg.addColorStop(0, '#9a3a2c'); pg.addColorStop(1, '#5e1d17'); g.fillStyle = pg; g.beginPath(); g.arc(w / 2, h / 2, 102, 0, 7); g.fill();
-  speckle(g, w, h, 9000, .2, ['#3a0f0b', '#d9b9a0', '#6b6b6b'], 1.6);
-  for (const [cx, cy] of [[34, 34], [w - 34, 34], [34, h - 34], [w - 34, h - 34]]) { g.fillStyle = '#4b4f57'; g.beginPath(); g.arc(cx, cy, 26, 0, 7); g.fill(); g.strokeStyle = '#c9ad78'; g.lineWidth = 4; g.stroke(); }
+  for (let i = 0; i < 22; i++) { g.strokeStyle = `rgba(120,108,92,${rand(.08, .2)})`; g.lineWidth = rand(.5, 2); g.beginPath(); let x = rand(0, w), y = rand(0, h); g.moveTo(x, y); for (let k = 0; k < 5; k++) { x += rand(-90, 90); y += rand(-90, 90); g.lineTo(x, y); } g.stroke(); }
+  g.fillStyle = '#b89a6a'; g.fillRect(0, 0, w, 22); g.fillRect(0, 0, 22, h);
+  g.save(); g.translate(w / 2, h / 2); g.rotate(Math.PI / 4); g.fillStyle = '#5e1d17'; g.fillRect(-90, -90, 180, 180); g.fillStyle = '#2f5a46'; g.fillRect(-60, -60, 120, 120); g.fillStyle = '#e9dcc0'; g.fillRect(-36, -36, 72, 72); g.restore();
+  speckle(g, w, h, 5000, .15, ['#3a0f0b', '#d9b9a0', '#6b6b6b'], 1.4);
 });
-C.marble = makeCanvas(256, 512, (g, w, h) => {
-  g.fillStyle = '#f2ede4'; g.fillRect(0, 0, w, h);
-  for (let i = 0; i < 18; i++) { g.strokeStyle = `rgba(140,128,112,${rand(.1, .3)})`; g.lineWidth = rand(.4, 1.6); g.beginPath(); let x = rand(0, w), y = rand(0, h); g.moveTo(x, y); for (let k = 0; k < 6; k++) { x += rand(-40, 40); y += rand(-70, 70); g.lineTo(x, y); } g.stroke(); }
-});
-C.trav = makeCanvas(512, 512, (g, w, h) => {
-  g.fillStyle = '#e4d7bd'; g.fillRect(0, 0, w, h);
-  for (let y = 0; y < h; y += 4) { g.fillStyle = `rgba(${150 + rand(-20, 20)},${130 + rand(-15, 15)},100,${rand(.02, .08)})`; g.fillRect(0, y, w, rand(1, 4)); }
-  speckle(g, w, h, 3000, .3, ['#9a8762', '#fff8e8'], 2.2);
-  g.strokeStyle = 'rgba(120,100,70,.25)'; g.lineWidth = 2; for (let y = 0; y <= h; y += 128) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
-});
+C.marble2 = makeCanvas(256, 512, (g, w, h) => { g.fillStyle = '#f2ede4'; g.fillRect(0, 0, w, h); for (let i = 0; i < 18; i++) { g.strokeStyle = `rgba(140,128,112,${rand(.1, .3)})`; g.lineWidth = rand(.4, 1.6); g.beginPath(); let x = rand(0, w), y = rand(0, h); g.moveTo(x, y); for (let k = 0; k < 6; k++) { x += rand(-40, 40); y += rand(-70, 70); g.lineTo(x, y); } g.stroke(); } });
+C.porphyry = makeCanvas(128, 256, (g, w, h) => { g.fillStyle = '#6a1c18'; g.fillRect(0, 0, w, h); speckle(g, w, h, 4000, .5, ['#3a0c0a', '#c98a7a', '#8a2a22'], 1.6); });
 C.coffer = makeCanvas(256, 256, (g, w, h) => {
   g.fillStyle = '#efe3c6'; g.fillRect(0, 0, w, h);
   const m = 22; g.fillStyle = '#d8c08a'; g.fillRect(m, m, w - 2 * m, h - 2 * m);
@@ -666,127 +739,312 @@ C.coffer = makeCanvas(256, 256, (g, w, h) => {
   for (let i = 0; i < 8; i++) { g.rotate(Math.PI / 4); g.beginPath(); g.ellipse(0, -22, 9, 20, 0, 0, 7); g.fill(); }
   g.fillStyle = '#fff1c4'; g.beginPath(); g.arc(0, 0, 10, 0, 7); g.fill();
 });
-C.gloria = makeCanvas(1024, 1024, (g, w, h) => {
-  g.translate(512, 512);
-  for (let i = 0; i < 84; i++) { const a = i / 84 * Math.PI * 2, len = 330 + (i % 2 ? -50 : 120) + rand(0, 50); g.save(); g.rotate(a); const gr = g.createLinearGradient(150, 0, len, 0); gr.addColorStop(0, 'rgba(255,214,120,.95)'); gr.addColorStop(1, 'rgba(225,150,40,0)'); g.fillStyle = gr; g.beginPath(); g.moveTo(150, -7); g.lineTo(len, 0); g.lineTo(150, 7); g.fill(); g.restore(); }
-  for (let i = 0; i < 70; i++) { const a = rand(0, 7), r = rand(175, 255), s = rand(22, 46); const gr = g.createRadialGradient(Math.cos(a) * r, Math.sin(a) * r, 2, Math.cos(a) * r, Math.sin(a) * r, s); gr.addColorStop(0, 'rgba(255,240,205,.85)'); gr.addColorStop(1, 'rgba(240,205,140,0)'); g.fillStyle = gr; g.beginPath(); g.arc(Math.cos(a) * r, Math.sin(a) * r, s, 0, 7); g.fill(); }
-  const al = g.createRadialGradient(0, 0, 10, 0, 0, 175); al.addColorStop(0, '#fff3c9'); al.addColorStop(.6, '#f2bd55'); al.addColorStop(1, '#c97d1e'); g.fillStyle = al; g.beginPath(); g.ellipse(0, 0, 150, 170, 0, 0, 7); g.fill();
-  g.strokeStyle = 'rgba(120,70,20,.7)'; g.lineWidth = 4; for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; g.beginPath(); g.moveTo(Math.cos(a) * 60, Math.sin(a) * 68); g.lineTo(Math.cos(a) * 150, Math.sin(a) * 170); g.stroke(); }
-  g.beginPath(); g.ellipse(0, 0, 60, 68, 0, 0, 7); g.stroke(); g.lineWidth = 8; g.beginPath(); g.ellipse(0, 0, 150, 170, 0, 0, 7); g.stroke();
-  g.fillStyle = '#fffaf0'; g.beginPath(); g.moveTo(-80, -6); g.quadraticCurveTo(-45, -62, 0, -14); g.quadraticCurveTo(45, -62, 80, -6); g.quadraticCurveTo(30, -4, 12, 8); g.quadraticCurveTo(24, 36, 6, 52); g.lineTo(0, 36); g.lineTo(-6, 52); g.quadraticCurveTo(-24, 36, -12, 8); g.quadraticCurveTo(-30, -4, -80, -6); g.fill(); g.beginPath(); g.arc(0, -10, 11, 0, 7); g.fill();
-});
+C.trav2 = makeCanvas(512, 512, (g, w, h) => { g.fillStyle = '#e6dac2'; g.fillRect(0, 0, w, h); for (let y = 0; y < h; y += 4) { g.fillStyle = `rgba(${150 + rand(-20, 20)},${130 + rand(-15, 15)},100,${rand(.02, .07)})`; g.fillRect(0, y, w, rand(1, 4)); } speckle(g, w, h, 2500, .25, ['#9a8762', '#fff8e8'], 2); g.strokeStyle = 'rgba(120,100,70,.22)'; g.lineWidth = 2; for (let y = 0; y <= h; y += 128) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); } for (let r = 0; r < 4; r++) for (let x = (r % 2) * 128; x <= w; x += 256) { g.beginPath(); g.moveTo(x, r * 128); g.lineTo(x, r * 128 + 128); g.stroke(); } });
 
+/* ---------- materials ---------- */
+const travMat = (wd, ht) => new THREE.MeshStandardMaterial({ map: tex(C.trav2, wd / 4, ht / 4), roughness: .85, side: THREE.DoubleSide });
 const MB = {
-  floor: new THREE.MeshStandardMaterial({ map: tex(C.mfloor, 6, 10), roughness: .22, metalness: .05 }),
-  marble: new THREE.MeshStandardMaterial({ map: tex(C.marble, 1, 2), roughness: .3 }),
-  trav: new THREE.MeshStandardMaterial({ map: tex(C.trav, 5, 2), roughness: .85, side: THREE.DoubleSide }),
-  travHi: new THREE.MeshStandardMaterial({ map: tex(C.trav, 3, 2), roughness: .85, side: THREE.DoubleSide }),
-  vault: new THREE.MeshStandardMaterial({ map: tex(C.coffer, 14, 11), emissiveMap: tex(C.coffer, 14, 11), emissive: '#ffffff', emissiveIntensity: .1, roughness: .7, metalness: .15, side: THREE.DoubleSide }),
-  cross: new THREE.MeshStandardMaterial({ map: tex(C.coffer, 10, 4), emissiveMap: tex(C.coffer, 10, 4), emissive: '#ffffff', emissiveIntensity: .1, roughness: .7, metalness: .15, side: THREE.DoubleSide }),
-  dome: new THREE.MeshStandardMaterial({ map: tex(C.coffer, 16, 5), emissiveMap: tex(C.coffer, 16, 5), emissive: '#ffffff', emissiveIntensity: .22, roughness: .7, metalness: .2, side: THREE.DoubleSide }),
-  bronze: new THREE.MeshStandardMaterial({ color: '#3d2a18', metalness: .75, roughness: .38 }),
-  gloria: new THREE.MeshBasicMaterial({ map: tex(C.gloria, 1, 1), transparent: true, depthWrite: false, toneMapped: false }),
-  pieta: new THREE.MeshStandardMaterial({ map: tex(C.marble, 1, 1), color: '#fbf7ef', roughness: .32, emissive: '#2a241c', emissiveIntensity: .25 }),
+  floor: new THREE.MeshStandardMaterial({ map: tex(C.mfloor2, 8, 13), roughness: .2, metalness: .05 }),
+  marble: new THREE.MeshStandardMaterial({ map: tex(C.marble2, 1, 2), roughness: .28 }),
+  porph: new THREE.MeshStandardMaterial({ map: tex(C.porphyry, 1, 3), roughness: .25 }),
+  ceil: new THREE.MeshStandardMaterial({ map: tex(C.coffer, 5, 14), emissiveMap: tex(C.coffer, 5, 14), emissive: '#ffffff', emissiveIntensity: .14, roughness: .6, metalness: .2, side: THREE.DoubleSide }),
+  stars: new THREE.MeshStandardMaterial({ map: tex(C.stars, 3, 12), emissiveMap: tex(C.stars, 3, 12), emissive: '#ffffff', emissiveIntensity: .18, roughness: .9, side: THREE.DoubleSide }),
+  apse: new THREE.MeshStandardMaterial({ map: tex(C.apse, 1, 1), emissiveMap: tex(C.apse, 1, 1), emissive: '#ffffff', emissiveIntensity: .32, roughness: .5, metalness: .3, side: THREE.DoubleSide }),
+  arch: new THREE.MeshStandardMaterial({ map: fitTex(tex(C.archFace, 1, 1), 14, 14), emissiveMap: fitTex(tex(C.archFace, 1, 1), 14, 14), emissive: '#ffffff', emissiveIntensity: .25, roughness: .5, metalness: .3, side: THREE.DoubleSide }),
+  bronze: new THREE.MeshStandardMaterial({ color: '#3a2a1c', metalness: .78, roughness: .36 }),
+  stone: new THREE.MeshStandardMaterial({ color: '#fbf7ef', map: tex(C.marble2, 1, 1), roughness: .32, emissive: '#2a241c', emissiveIntensity: .22 }),
+  pieta: new THREE.MeshStandardMaterial({ map: tex(C.marble2, 1, 1), color: '#fbf7ef', roughness: .32, emissive: '#2a241c', emissiveIntensity: .25 }),
   red: new THREE.MeshStandardMaterial({ color: '#6e1d1c', roughness: .85 }),
+  purple: new THREE.MeshStandardMaterial({ color: '#4b2a5e', roughness: .9, side: THREE.DoubleSide }),
+  gloria: new THREE.MeshBasicMaterial({ map: tex(C.glow, 1, 1), transparent: true, depthWrite: false }),
 };
-
-// floor
-{ const f = plane(2 * W, ZB - ZF, MB.floor, 0, 0, 0, 0, -Math.PI / 2); f.userData.floor = true; f.name = 'floor'; }
-
-// nave walls (travertine) with entablature
-plane(ZB - XZ, WH, MB.trav, -W, WH / 2, (ZB + XZ) / 2, Math.PI / 2);
-plane(ZB - XZ, WH, MB.trav, W, WH / 2, (ZB + XZ) / 2, -Math.PI / 2);
-box(.08, .7, ZB - ZF, M.wood, -W + .04, .35, 0, { cast: false }); box(.08, .7, ZB - ZF, M.wood, W - .04, .35, 0, { cast: false });
-for (const s of [-1, 1]) { box(.7, .55, ZB - XZ, MB.marble, s * (W - .35), WH - .28, (ZB + XZ) / 2, { cast: false }); box(.9, .14, ZB - XZ, M.gold, s * (W - .45), WH + .04, (ZB + XZ) / 2, { cast: false }); }
-
-// coffered barrel vault
-{ const g = new THREE.CylinderGeometry(W, W, ZB - XZ, 56, 1, true, Math.PI / 2, Math.PI); const v = new THREE.Mesh(g, MB.vault); v.rotation.x = Math.PI / 2; v.position.set(0, WH, (ZB + XZ) / 2); world.add(v);
-  for (let z = XZ + .2; z <= ZB; z += 6.2) { const rib = new THREE.Mesh(new THREE.TorusGeometry(W - .08, .2, 8, 56, Math.PI), M.gold); rib.position.set(0, WH, z); world.add(rib); } }
-// back wall (tympanum)
-{ const sh = new THREE.Shape(); sh.moveTo(-W, 0); sh.lineTo(W, 0); sh.lineTo(W, WH); sh.absarc(0, WH, W, 0, Math.PI, false); sh.lineTo(-W, 0);
-  const bw = new THREE.Mesh(new THREE.ShapeGeometry(sh, 32), MB.trav); bw.position.z = ZB; bw.rotation.y = Math.PI; world.add(bw); }
-
-// crossing: tall walls, coffered ceiling with the cupola
-plane(ZB - ZB + (XZ - ZF), RH, MB.travHi, -W, RH / 2, (XZ + ZF) / 2, Math.PI / 2);
-plane(XZ - ZF, RH, MB.travHi, W, RH / 2, (XZ + ZF) / 2, -Math.PI / 2);
-plane(2 * W, RH, MB.travHi, 0, RH / 2, ZF + .01);
-{ const sh = new THREE.Shape(); sh.moveTo(-W, -XZ); sh.lineTo(W, -XZ); sh.lineTo(W, -ZF); sh.lineTo(-W, -ZF); sh.lineTo(-W, -XZ);
-  const hole = new THREE.Path(); hole.absarc(0, 15.5, 4.3, 0, Math.PI * 2, true); sh.holes.push(hole);
-  const c = new THREE.Mesh(new THREE.ShapeGeometry(sh, 48), MB.cross); c.rotation.x = -Math.PI / 2; c.position.y = RH; world.add(c);
-  const arch = new THREE.Shape(); arch.moveTo(-W, WH); arch.lineTo(-W, RH + .01); arch.lineTo(W, RH + .01); arch.lineTo(W, WH); arch.absarc(0, WH, W - .02, 0, Math.PI, false);
-  const af = new THREE.Mesh(new THREE.ShapeGeometry(arch, 48), MB.travHi); af.position.z = XZ; world.add(af);
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(W - .1, .32, 8, 56, Math.PI), M.gold); ring.position.set(0, WH, XZ); world.add(ring);
-  // inscription band look (gold frieze)
-  box(2 * W, .7, .1, M.gold, 0, RH - .5, ZF + .08, { cast: false });
-}
-// cupola: drum with windows, coffered dome, lantern oculus
-{
-  const drum = new THREE.Mesh(new THREE.CylinderGeometry(4.3, 4.3, 2.6, 48, 1, true), MB.travHi); drum.position.set(0, RH + 1.3, -15.5); world.add(drum);
-  for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2; const wpn = new THREE.Mesh(new THREE.PlaneGeometry(.75, 1.7), M.sky); wpn.position.set(Math.sin(a) * 4.25, RH + 1.3, -15.5 + Math.cos(a) * 4.25); wpn.lookAt(0, RH + 1.3, -15.5); world.add(wpn); }
-  const dome = new THREE.Mesh(new THREE.SphereGeometry(4.3, 48, 20, 0, Math.PI * 2, 0, Math.PI / 2), MB.dome); dome.position.set(0, RH + 2.6, -15.5); world.add(dome);
-  const ocu = new THREE.Mesh(new THREE.CircleGeometry(.85, 32), M.sky); ocu.rotation.x = Math.PI / 2; ocu.position.set(0, RH + 6.88, -15.5); world.add(ocu);
-  const oring = new THREE.Mesh(new THREE.TorusGeometry(.9, .1, 8, 32), M.gold); oring.rotation.x = Math.PI / 2; oring.position.set(0, RH + 6.85, -15.5); world.add(oring);
-  const dring = new THREE.Mesh(new THREE.TorusGeometry(4.32, .16, 8, 48), M.gold); dring.rotation.x = Math.PI / 2; dring.position.set(0, RH + .02, -15.5); world.add(dring);
-  const sm = new THREE.MeshBasicMaterial({ map: tex(C.shaft, 1, 1), transparent: true, opacity: .2, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, color: '#fff1d6' });
-  const cone = new THREE.Mesh(new THREE.CylinderGeometry(.85, 2.8, RH + 5.6, 32, 1, true), sm); cone.position.set(0, (RH + 6.8) / 2 + .6, -15.8); world.add(cone); shafts.push(cone);
-}
-
-// marble pilasters with gilded capitals + big crossing piers
-function pilaster(x, z, h, wdt = 1.2, dep = .5) {
-  const s = Math.sign(x); const px = x - s * dep / 2;
-  box(dep, h, wdt, MB.marble, px, h / 2, z); box(dep + .14, .5, wdt + .2, MB.marble, px, .25, z); box(dep + .18, .45, wdt + .26, M.gold, px, h - .22, z);
-  for (let k = 0; k < 4; k++) box(.04, h - 1.4, .08, new THREE.MeshStandardMaterial({ color: '#d9d1c2', roughness: .4 }), px - s * (dep / 2 + .01), h / 2, z - .42 + k * .28, { cast: false });
-  addCollider(Math.min(x, x - s * dep), Math.max(x, x - s * dep), z - wdt / 2, z + wdt / 2);
-}
-for (const pz of [-6, 0, 6, 12, 18]) { pilaster(-W, pz, WH); pilaster(W, pz, WH); }
-for (const s of [-1, 1]) { pilaster(s * W, XZ - .3, RH - .2, 1.6, 1.0); }
-
-// left: tall arched clerestory windows + light shafts
+const glassMat = (canvas, wd, ht) => { const m = new THREE.MeshStandardMaterial({ map: fitTex(tex(canvas, 1, 1), wd, ht), emissiveMap: fitTex(tex(canvas, 1, 1), wd, ht), emissive: '#ffffff', emissiveIntensity: 1, color: '#222', side: THREE.DoubleSide }); glassMats.push(m); return m; };
 const archShape = (wd, ht) => { const sh = new THREE.Shape(); sh.moveTo(-wd / 2, 0); sh.lineTo(wd / 2, 0); sh.lineTo(wd / 2, ht - wd / 2); sh.absarc(0, ht - wd / 2, wd / 2, 0, Math.PI, false); sh.lineTo(-wd / 2, 0); return sh; };
-for (const wz of [-8.6, -3, 3, 9, 15]) {
-  const wm = new THREE.Mesh(new THREE.ShapeGeometry(archShape(2.0, 3.6), 16), M.win); wm.position.set(-W + .03, 4.9, wz); wm.rotation.y = Math.PI / 2; world.add(wm);
-  const fr = new THREE.Mesh(new THREE.ShapeGeometry(archShape(2.3, 3.8), 16), M.gold); fr.position.set(-W + .02, 4.75, wz); fr.rotation.y = Math.PI / 2; world.add(fr);
-  box(.06, 3.4, .07, M.frame, -W + .06, 6.6, wz, { cast: false }); box(.06, .07, 2.0, M.frame, -W + .06, 7.1, wz, { cast: false });
-  const sm = new THREE.MeshBasicMaterial({ map: tex(C.shaft, 1, 1), transparent: true, opacity: .16, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, color: '#fff2d8' });
-  const sh = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 10), sm); sh.position.set(-W + 3.6, 3.6, wz); sh.rotation.set(0, 0, .55); world.add(sh); shafts.push(sh);
+const shaftMat = (col, op = .14) => new THREE.MeshBasicMaterial({ map: tex(C.shaft, 1, 1), transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, color: col });
+function wallX(x, z0, z1, y0, y1, face, mat) { const m = plane(z1 - z0, y1 - y0, mat || travMat(z1 - z0, y1 - y0), x, (y0 + y1) / 2, (z0 + z1) / 2, face > 0 ? Math.PI / 2 : -Math.PI / 2); return m; }
+function wallZ(z, x0, x1, y0, y1, face, mat) { return plane(x1 - x0, y1 - y0, mat || travMat(x1 - x0, y1 - y0), (x0 + x1) / 2, (y0 + y1) / 2, z, face > 0 ? 0 : Math.PI); }
+
+/* ---------- floor, ceilings ---------- */
+{ const f = plane(2 * W, ZB - ZF + 6, MB.floor, 0, 0, -3, 0, -Math.PI / 2); f.userData.floor = true; f.name = 'floor'; }
+plane(2 * NX, ZB - ZF, MB.ceil, 0, NH, 0, 0, Math.PI / 2);
+for (const s of [-1, 1]) { const c = plane(W - NX, ZB + 12, MB.stars, s * (NX + W) / 2, AH, (ZB - 12) / 2, 0, Math.PI / 2); for (const z of COLS_Z) box(W - NX, .22, .3, M.gold, s * (NX + W) / 2, AH - .11, z, { cast: false }); }
+for (const s of [-1, 1]) box(.5, .3, ZB - ZF, M.gold, s * (NX - .25), NH - .15, 0, { cast: false });
+
+/* ---------- colonnades (Ionic) + entablature + clerestory ---------- */
+function ionic(x, z, h = 5.75) {
+  const g = new THREE.Group(); g.position.set(x, 0, z); world.add(g);
+  box(.95, .3, .95, MB.marble, 0, .15, 0, { parent: g });
+  const tor = new THREE.Mesh(new THREE.TorusGeometry(.42, .08, 8, 24), MB.marble); tor.rotation.x = Math.PI / 2; tor.position.y = .38; g.add(tor);
+  const sh = new THREE.Mesh(new THREE.CylinderGeometry(.34, .4, h - .7, 24), MB.marble); sh.position.y = .38 + (h - .7) / 2; sh.castShadow = true; g.add(sh);
+  box(1.0, .22, 1.0, M.gold, 0, h - .2, 0, { parent: g });
+  for (const s of [-1, 1]) { const v = new THREE.Mesh(new THREE.TorusGeometry(.13, .05, 8, 16), M.gold); v.position.set(0, h - .32, s * .45); v.rotation.y = Math.PI / 2; g.add(v); }
+  addCollider(x - .45, x + .45, z - .45, z + .45);
+  return g;
 }
-// right: niches with marble saints
-function makeSaint(kind) {
-  const g = new THREE.Group(); const m = MB.pieta;
-  const prof = [[0, 0], [.32, 0], [.3, .1], [.26, .6], [.21, 1.05], [.17, 1.28], [.1, 1.36], [0, 1.38]].map(p => new THREE.Vector2(...p));
-  g.add(new THREE.Mesh(new THREE.LatheGeometry(prof, 28), m));
-  const hd = new THREE.Mesh(new THREE.SphereGeometry(.13, 18, 14), m); hd.position.y = 1.5; g.add(hd);
-  if (kind === 'key') { const k = new THREE.Group(); k.add(new THREE.Mesh(new THREE.CylinderGeometry(.025, .025, .6, 8), M.gold)); const bow = new THREE.Mesh(new THREE.TorusGeometry(.07, .02, 6, 16), M.gold); bow.position.y = .34; k.add(bow); const bit = new THREE.Mesh(new THREE.BoxGeometry(.1, .08, .03), M.gold); bit.position.set(.06, -.24, 0); k.add(bit); k.position.set(.18, .95, .2); k.rotation.z = .4; g.add(k); }
-  else { const sw = new THREE.Mesh(new THREE.BoxGeometry(.05, .9, .02), new THREE.MeshStandardMaterial({ color: '#b9b9b9', metalness: .8, roughness: .3 })); sw.position.set(.2, .8, .22); g.add(sw); const book = new THREE.Mesh(new THREE.BoxGeometry(.22, .28, .07), m); book.position.set(-.16, .95, .22); g.add(book); }
+for (const s of [-1, 1]) {
+  for (const z of COLS_Z) ionic(s * NX, z);
+  box(.9, .95, ZB - (-12), MB.marble, s * NX, 6.25 + .2, (ZB - 12) / 2);
+  box(1.0, .12, ZB + 12, M.gold, s * NX, 6.95, (ZB - 12) / 2, { cast: false });
+  wallX(s * NX, -12, ZB, AH, NH, -s);                       // clerestory (visible from nave)
+  // mosaic frieze + clerestory stained glass
+  for (let k = 0; k < COLS_Z.length - 1; k++) {
+    const zc = (COLS_Z[k] + COLS_Z[k + 1]) / 2;
+    const mp = plane(3.0, 1.85, new THREE.MeshStandardMaterial({ map: tex(mosaicPanel(k + (s > 0 ? 3 : 0)), 1, 1), emissiveMap: tex(mosaicPanel(k + (s > 0 ? 3 : 0)), 1, 1), emissive: '#fff', emissiveIntensity: .18, roughness: .5, metalness: .2 }), s * (NX - .03), 8.45, zc, s > 0 ? -Math.PI / 2 : Math.PI / 2);
+    const gm = glassMat(saintGlass(k * 2 + (s > 0 ? 1 : 0)), 1.25, 2.9);
+    const wn = new THREE.Mesh(new THREE.ShapeGeometry(archShape(1.25, 2.9), 16), gm); wn.position.set(s * (NX - .04), 10.0, zc); wn.rotation.y = s > 0 ? -Math.PI / 2 : Math.PI / 2; world.add(wn);
+    const fr = new THREE.Mesh(new THREE.ShapeGeometry(archShape(1.55, 3.1), 16), M.gold); fr.position.set(s * (NX - .02), 9.9, zc); fr.rotation.y = wn.rotation.y; world.add(fr);
+    const sh = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 12), shaftMat('#ffe9c8', .1)); sh.position.set(s * (NX - 3.2), 6.2, zc); sh.rotation.set(0, 0, -s * .5); world.add(sh); shafts.push(sh);
+  }
+  for (const z of COLS_Z) box(.06, 6.6, .32, M.gold, s * (NX - .05), 10.4, z, { cast: false });
+}
+
+/* ---------- outer aisle walls with saint windows ---------- */
+const WIN_Z = [-9, -4, 1, 6, 11, 16];
+const CHAPEL = { z0: 12.6, z1: 16.4, x: 15.6 };
+let winIdx = 0;
+for (const s of [-1, 1]) {
+  const x = s * W;
+  if (s < 0) wallX(x, -12, ZB, 0, AH, 1);
+  else { wallX(x, -12, CHAPEL.z0, 0, AH, -1); wallX(x, CHAPEL.z1, ZB, 0, AH, -1); wallX(x, CHAPEL.z0, CHAPEL.z1, 5.3, AH, -1); }
+  box(.08, .8, ZB + 12, M.wood, x - s * .04, .4, (ZB - 12) / 2, { cast: false });
+  for (const z of WIN_Z) {
+    if (s > 0 && z === 16) continue;
+    const gm = glassMat(saintGlass(winIdx++), 1.5, 3.8);
+    const wn = new THREE.Mesh(new THREE.ShapeGeometry(archShape(1.5, 3.8), 16), gm); wn.position.set(x - s * .03, 2.7, z); wn.rotation.y = s > 0 ? -Math.PI / 2 : Math.PI / 2; world.add(wn); markPick(wn, 'glass', { name: SAINTS[(winIdx - 1) % SAINTS.length].name });
+    const fr = new THREE.Mesh(new THREE.ShapeGeometry(archShape(1.85, 4.05), 16), MB.marble); fr.position.set(x - s * .02, 2.55, z); fr.rotation.y = wn.rotation.y; world.add(fr);
+    const pool = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.4), new THREE.MeshBasicMaterial({ map: tex(saintGlass(winIdx), 1, 1), transparent: true, opacity: .12, blending: THREE.AdditiveBlending, depthWrite: false }));
+    pool.rotation.x = -Math.PI / 2; pool.position.set(x - s * 2.6, .012, z); world.add(pool); pool.userData.pool = true; pool.userData.keepColor = true; shafts.push(pool);
+    const sh = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 6), shaftMat(pick(['#ffd9a8', '#c8d8ff', '#ffc8c8']), .12)); sh.position.set(x - s * 1.6, 2.6, z); sh.rotation.set(0, 0, s * .55); world.add(sh); sh.userData.keepColor = true; shafts.push(sh);
+  }
+}
+// aisle front end walls (side altars) and sanctuary walls
+for (const s of [-1, 1]) { wallZ(-12, Math.min(s * NX, s * W), Math.max(s * NX, s * W), 0, AH, 1); }
+for (const s of [-1, 1]) wallX(s * NX, ZF, -12, 0, NH, -s, new THREE.MeshStandardMaterial({ map: tex(C.marble2, 2, 3), roughness: .4, side: THREE.DoubleSide }));
+
+/* ---------- back wall with rose window, doors, organ loft ---------- */
+{
+  const sh = new THREE.Shape(); sh.moveTo(-W, 0); sh.lineTo(W, 0); sh.lineTo(W, AH); sh.lineTo(NX, AH); sh.lineTo(NX, NH); sh.lineTo(-NX, NH); sh.lineTo(-NX, AH); sh.lineTo(-W, AH); sh.lineTo(-W, 0);
+  const hole = new THREE.Path(); hole.absarc(0, 10.6, 2.2, 0, Math.PI * 2, true); sh.holes.push(hole);
+  const bw = new THREE.Mesh(new THREE.ShapeGeometry(sh, 32), travMat(24, 14)); bw.material.map.repeat.set(.25, .25); bw.position.z = ZB; bw.rotation.y = Math.PI; world.add(bw);
+  const rm = new THREE.MeshStandardMaterial({ map: tex(C.rose, 1, 1), emissiveMap: tex(C.rose, 1, 1), emissive: '#fff', emissiveIntensity: 1, color: '#222', side: THREE.DoubleSide }); glassMats.push(rm);
+  const rose = new THREE.Mesh(new THREE.CircleGeometry(2.2, 48), rm); rose.position.set(0, 10.6, ZB + .01); rose.rotation.y = Math.PI; world.add(rose); markPick(rose, 'rose');
+  const rr = new THREE.Mesh(new THREE.TorusGeometry(2.25, .14, 10, 48), M.gold); rr.position.set(0, 10.6, ZB - .05); world.add(rr);
+  const sm = shaftMat('#ffdcb8', .1); const rs = new THREE.Mesh(new THREE.CylinderGeometry(2.0, 3.4, 16, 24, 1, true), sm); rs.rotation.x = Math.PI / 2 - .25; rs.position.set(0, 8.6, ZB - 8); world.add(rs); shafts.push(rs);
+}
+plane(3.4, 4.2, M.door, 0, 2.1, ZB - .02, Math.PI);
+{ const fr = new THREE.Mesh(new THREE.ShapeGeometry(archShape(4.2, 5.0), 16), MB.marble); fr.position.set(0, 0, ZB - .01); fr.rotation.y = Math.PI; world.add(fr); }
+{
+  box(2 * NX - .9, .35, 2.4, MB.marble, 0, 5.45, ZB - 1.2);
+  for (const s of [-1, 1]) { const c = new THREE.Mesh(new THREE.CylinderGeometry(.2, .22, 5.3, 16), MB.marble); c.position.set(s * 3.6, 2.65, ZB - 2.35); world.add(c); addCollider(s * 3.6 - .25, s * 3.6 + .25, ZB - 2.6, ZB - 2.1); }
+  box(2 * NX - .9, .8, .08, M.gold, 0, 6.0, ZB - 2.4);
+  for (let i = 0; i < 30; i++) { const h = 1.0 + Math.sin(i / 29 * Math.PI) * 1.2 + (i % 2) * .2; const p = new THREE.Mesh(new THREE.CylinderGeometry(.08, .08, h, 10), M.gold); p.position.set(-5.1 + i * .35, 5.65 + h / 2, ZB - .5); world.add(p); }
+}
+
+/* ---------- sanctuary: triumphal arch, apse mosaic, altars ---------- */
+{
+  const sh = new THREE.Shape(); sh.moveTo(-NX, 0); sh.lineTo(NX, 0); sh.lineTo(NX, NH); sh.lineTo(-NX, NH); sh.lineTo(-NX, 0);
+  const hole = new THREE.Path(); hole.moveTo(-5, 0); hole.lineTo(-5, 7.5); hole.absarc(0, 7.5, 5, Math.PI, 0, true); hole.lineTo(5, 0); hole.lineTo(-5, 0); sh.holes.push(hole);
+  const af = new THREE.Mesh(new THREE.ShapeGeometry(sh, 40), MB.arch); af.position.z = -12; world.add(af);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(5.05, .16, 8, 48, Math.PI), M.gold); ring.position.set(0, 7.5, -11.95); world.add(ring);
+  for (const s of [-1, 1]) box(.3, 7.5, .3, M.gold, s * 5.1, 3.75, -11.95, { cast: false });
+}
+// apse
+{
+  const AZ = ZF, R = 6;
+  const wall = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 8, 40, 1, true, Math.PI / 2, Math.PI), new THREE.MeshStandardMaterial({ map: tex(C.marble2, 6, 2), roughness: .4, side: THREE.DoubleSide })); wall.position.set(0, 4, AZ); world.add(wall);
+  const dmap = tex(C.apse, 1, 1); dmap.wrapS = THREE.RepeatWrapping; dmap.repeat.x = -1; dmap.offset.x = 1; MB.apse.map = dmap; MB.apse.emissiveMap = dmap;
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(R, 48, 20, 0, Math.PI, 0, Math.PI / 2), MB.apse); dome.rotation.y = Math.PI; dome.position.set(0, 8, AZ); world.add(dome); markPick(dome, 'apse');
+  const dr = new THREE.Mesh(new THREE.TorusGeometry(R - .05, .12, 8, 48, Math.PI), M.gold); dr.rotation.x = -Math.PI / 2; dr.position.set(0, 8, AZ); world.add(dr);
+  const sp = new THREE.Shape(); sp.moveTo(-NX, 8); sp.lineTo(-NX, NH); sp.lineTo(NX, NH); sp.lineTo(NX, 8); sp.lineTo(R, 8); sp.absarc(0, 8, R, 0, Math.PI, false); sp.lineTo(-NX, 8);
+  const spm = new THREE.Mesh(new THREE.ShapeGeometry(sp, 40), new THREE.MeshStandardMaterial({ map: tex(C.marble2, 2, 1), roughness: .4, side: THREE.DoubleSide })); spm.position.z = AZ; world.add(spm);
+  for (const s of [-1, 1]) wallZ(AZ, s > 0 ? R : -NX, s > 0 ? NX : -R, 0, 8, 1, new THREE.MeshStandardMaterial({ map: tex(C.marble2, 1, 2), roughness: .4, side: THREE.DoubleSide }));
+  // three lancet windows in the apse
+  [-0.55, 0, 0.55].forEach((a, i) => { const th = Math.PI + a; const gm = glassMat(saintGlass([1, 0, 2][i]), 1.0, 3.4); const wn = new THREE.Mesh(new THREE.ShapeGeometry(archShape(1.0, 3.4), 16), gm); wn.position.set(Math.sin(th) * (R - .05), 3.3, AZ + Math.cos(th) * (R - .05)); wn.lookAt(0, 3.3, AZ); world.add(wn); });
+  box(12, .9, 6.2, MB.marble, 0, .45, AZ - 3.1, { cast: false });
+}
+box(2 * NX, .9, 8, MB.marble, 0, .45, -16, { cast: false });
+box(2 * NX - 2, .6, .4, MB.marble, 0, .3, -11.8, { cast: false }); box(2 * NX - 2, .3, .4, MB.marble, 0, .15, -11.4, { cast: false });
+box(2 * NX, .05, .05, M.gold, 0, .91, -12.0, { cast: false });
+// communion rail
+for (const [a, b] of [[-5, -.9], [.9, 5]]) {
+  box(b - a, .1, .32, MB.marble, (a + b) / 2, 1.85, -12.4); box(b - a, .12, .4, MB.marble, (a + b) / 2, .96, -12.4, { cast: false });
+  for (let x = a + .15; x < b; x += .3) { const bal = new THREE.Mesh(new THREE.LatheGeometry([[0, 0], [.07, 0], [.05, .2], [.09, .45], [.04, .75], [.06, .85], [0, .86]].map(p => new THREE.Vector2(...p)), 10), MB.marble); bal.position.set(x, .98, -12.4); world.add(bal); }
+}
+// freestanding altar under a porphyry baldacchino
+{
+  const a = box(2.8, 1.0, 1.2, MB.marble, 0, 1.4, -16.4); box(2.95, .06, 1.3, M.cloth, 0, 1.93, -16.4, { cast: false }); box(2.97, .5, .02, M.cloth, 0, 1.72, -15.74, { cast: false }); markPick(a, 'altar');
+  box(1.2, .14, .02, M.gold, 0, 1.55, -15.72, { cast: false });
+  for (const sx of [-.95, .95]) { const c = new THREE.Mesh(new THREE.CylinderGeometry(.035, .035, .4, 8), M.white); c.position.set(sx, 2.15, -16.6); world.add(c); }
+  for (const s of [-1, 1]) for (let i = 0; i < 6; i++) { const f = new THREE.Mesh(new THREE.SphereGeometry(rand(.08, .12), 8, 6), new THREE.MeshStandardMaterial({ color: pick(['#f5f0e4', '#ffd166', '#f2b8c6', '#f5f0e4']), roughness: .8 })); f.position.set(s * 1.75 + rand(-.25, .25), 1.0 + rand(.1, .55), -15.8 + rand(-.2, .2)); world.add(f); }
+  const y0 = 1.8, H = 4.6;
+  for (const sx of [-2.3, 2.3]) for (const sz of [-18.3, -14.5]) {
+    box(.7, .5, .7, MB.marble, sx, .9 + .25, sz); const col = new THREE.Mesh(new THREE.CylinderGeometry(.22, .25, H, 20), MB.porph); col.position.set(sx, y0 - .4 + H / 2, sz); col.castShadow = true; world.add(col);
+    box(.6, .3, .6, M.gold, sx, y0 - .4 + H + .15, sz);
+  }
+  const top = y0 - .4 + H + .3;
+  box(5.4, .6, 4.6, MB.marble, 0, top + .3, -16.4); box(5.5, .1, 4.7, M.gold, 0, top + .65, -16.4, { cast: false }); box(5.5, .1, 4.7, M.gold, 0, top + .02, -16.4, { cast: false });
+  const roof = new THREE.Mesh(new THREE.ConeGeometry(3.3, 1.6, 4, 1), MB.marble); roof.rotation.y = Math.PI / 4; roof.scale.z = .86; roof.position.set(0, top + 1.5, -16.4); world.add(roof);
+  box(.08, .7, .08, M.gold, 0, top + 2.6, -16.4); box(.4, .08, .08, M.gold, 0, top + 2.75, -16.4);
+}
+// high altar with tabernacle against the apse
+{
+  const ha = box(3.4, 1.1, 1.0, MB.marble, 0, .9 + .55, -24.6); box(3.5, .08, 1.1, M.gold, 0, 2.04, -24.6, { cast: false }); markPick(ha, 'tabernacle');
+  box(3.2, .5, .5, MB.marble, 0, 2.3, -24.95);
+  const tb = new THREE.Group(); tb.position.set(0, 2.08, -24.5); world.add(tb);
+  box(.7, .75, .55, M.gold, 0, .375, 0, { parent: tb }); const td = new THREE.Mesh(new THREE.SphereGeometry(.36, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), M.gold); td.position.y = .75; tb.add(td);
+  box(.05, .3, .05, M.gold, 0, 1.25, 0, { parent: tb }); box(.18, .05, .05, M.gold, 0, 1.3, 0, { parent: tb });
+  const veil = new THREE.Mesh(new THREE.CylinderGeometry(.42, .5, .55, 20, 1, true, -Math.PI * .45, Math.PI * .9), new THREE.MeshStandardMaterial({ color: '#f5f0e6', roughness: .9, side: THREE.DoubleSide })); veil.position.set(0, .3, 0); tb.add(veil);
+  markPick(tb, 'tabernacle');
+  for (let i = 0; i < 6; i++) { const x = (i < 3 ? -1 : 1) * (.6 + (i % 3) * .35); const st = new THREE.Mesh(new THREE.CylinderGeometry(.04, .08, .5, 10), M.gold); st.position.set(x, 2.3 + .25 + .25, -24.95); world.add(st); const c = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, .4, 8), M.white); c.position.set(x, 3.25, -24.95); world.add(c); const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex(C.flame), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); fl.scale.set(.07, .14, 1); fl.position.set(x, 3.52, -24.95); world.add(fl); decoFlames.push(fl); }
+}
+// hanging sanctuary lamp (red) near the tabernacle
+{ const y = 4.6; const ch = new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, NH - y, 4), M.gold); ch.position.set(2.6, (NH + y) / 2, -22.4); world.add(ch);
+  const cup = new THREE.Mesh(new THREE.SphereGeometry(.16, 16, 12, 0, Math.PI * 2, Math.PI * .35, Math.PI * .65), M.gold); cup.position.set(2.6, y, -22.4); world.add(cup);
+  const glass = new THREE.Mesh(new THREE.SphereGeometry(.1, 12, 10), M.red); glass.position.set(2.6, y + .02, -22.4); world.add(glass);
+  const pl = new THREE.PointLight('#ff3020', 1.2, 4, 2); pl.position.set(2.6, y, -22.4); world.add(pl); }
+// ambo & paschal candle
+box(.7, 1.25, .5, M.lightwood, -3.9, .9 + .62, -13.6); box(.8, .06, .6, M.lightwood, -3.9, 2.18, -13.65);
+{ const pc = new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, 1.2, 12), M.white); pc.position.set(-4.8, 2.1, -13.9); world.add(pc); box(.3, .6, .3, M.gold, -4.8, 1.2, -13.9); const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex(C.flame), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); fl.scale.set(.08, .16, 1); fl.position.set(-4.8, 2.8, -13.9); world.add(fl); decoFlames.push(fl); }
+
+// the great hanging crucifix (rood) under the triumphal arch
+function makeRood() {
+  const g = new THREE.Group();
+  const cs = new THREE.Shape(); cs.moveTo(-.22, -2.0); cs.lineTo(.22, -2.0); cs.lineTo(.22, .55); cs.lineTo(1.3, .55); cs.lineTo(1.3, 1.0); cs.lineTo(.22, 1.0); cs.lineTo(.22, 1.75); cs.lineTo(-.22, 1.75); cs.lineTo(-.22, 1.0); cs.lineTo(-1.3, 1.0); cs.lineTo(-1.3, .55); cs.lineTo(-.22, .55); cs.lineTo(-.22, -2.0);
+  const board = new THREE.Mesh(new THREE.ExtrudeGeometry(cs, { depth: .12, bevelEnabled: true, bevelThickness: .03, bevelSize: .05, bevelSegments: 2 }), new THREE.MeshStandardMaterial({ color: '#3a2216', roughness: .55 })); board.position.z = -.12; g.add(board);
+  const edge = new THREE.Mesh(new THREE.ExtrudeGeometry(cs, { depth: .02, bevelEnabled: false }), M.gold); edge.scale.set(1.04, 1.02, 1); edge.position.z = -.16; g.add(edge);
+  for (const [x, y] of [[-1.3, .78], [1.3, .78], [0, 1.75], [0, -2.0]]) { const q = new THREE.Mesh(new THREE.CircleGeometry(.24, 4), M.gold); q.rotation.z = Math.PI / 4; q.position.set(x, y, .02); g.add(q); }
+  const ivory = new THREE.MeshStandardMaterial({ color: '#efe2c8', roughness: .45, emissive: '#3a2a18', emissiveIntensity: .2 });
+  const t = new THREE.Mesh(new THREE.CapsuleGeometry(.2, .75, 6, 14), ivory); t.position.set(0, .05, .18); g.add(t);
+  const hd = new THREE.Mesh(new THREE.SphereGeometry(.16, 16, 12), ivory); hd.position.set(.07, .7, .2); g.add(hd);
+  const halo = new THREE.Mesh(new THREE.TorusGeometry(.27, .03, 8, 32), M.gold); halo.position.set(.07, .74, .12); g.add(halo);
+  for (const s of [-1, 1]) { const a = new THREE.Mesh(new THREE.CapsuleGeometry(.065, 1.0, 4, 10), ivory); a.position.set(s * .62, .64, .16); a.rotation.z = s * 1.32; g.add(a); }
+  const lg = new THREE.Mesh(new THREE.CapsuleGeometry(.11, 1.05, 6, 12), ivory); lg.position.set(.02, -.95, .17); g.add(lg);
+  const cl = new THREE.Mesh(new THREE.CylinderGeometry(.22, .17, .3, 14), new THREE.MeshStandardMaterial({ color: '#f5f0e6', roughness: .8 })); cl.position.set(0, -.38, .17); g.add(cl);
+  const inri = new THREE.Mesh(new THREE.PlaneGeometry(.38, .2), new THREE.MeshStandardMaterial({ color: '#f5ead0', roughness: .7 })); inri.position.set(0, 1.4, .03); g.add(inri);
+  g.traverse(o => o.castShadow = true);
+  return g;
+}
+{ const r = makeRood(); r.scale.setScalar(1.2); r.position.set(0, 9.9, -12.3); world.add(r); markPick(r, 'rood');
+  for (const s of [-1, 1]) { const ch = new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, 3.0, 4), M.gold); ch.position.set(s * 1.1, 12.5, -12.3); world.add(ch); } }
+
+/* ---------- statues (painted, freestanding) ---------- */
+const L = (pts, seg = 32, ps = 0, pl = Math.PI * 2) => new THREE.LatheGeometry(pts.map(p => new THREE.Vector2(...p)), seg, ps, pl);
+function makeStatue({ robe, mantle, skin = '#efd3b8', hair = '#5a3a24', beard = false, veil = null, halo = true, sym = null, scale = 1 }) {
+  const g = new THREE.Group();
+  const rm = new THREE.MeshStandardMaterial({ color: robe, roughness: .5 }), mm = new THREE.MeshStandardMaterial({ color: mantle, roughness: .5, side: THREE.DoubleSide }), sk = new THREE.MeshStandardMaterial({ color: skin, roughness: .5 }), hm = new THREE.MeshStandardMaterial({ color: hair, roughness: .7 });
+  g.add(new THREE.Mesh(L([[0, 0], [.34, 0], [.33, .08], [.29, .5], [.24, 1.0], [.21, 1.25], [.14, 1.38], [0, 1.4]]), rm));
+  const mt = new THREE.Mesh(L([[.37, .05], [.35, .5], [.29, 1.0], [.25, 1.3], [.2, 1.4]], 32, Math.PI * .28, Math.PI * 1.44), mm); g.add(mt);
+  const hd = new THREE.Mesh(new THREE.SphereGeometry(.12, 20, 16), sk); hd.position.set(0, 1.53, .02); g.add(hd);
+  if (veil) { const v = new THREE.Mesh(L([[0, 1.72], [.12, 1.68], [.17, 1.56], [.19, 1.42], [.24, 1.3]], 28, Math.PI * .3, Math.PI * 1.4), new THREE.MeshStandardMaterial({ color: veil, roughness: .5, side: THREE.DoubleSide })); g.add(v); }
+  else { const h = new THREE.Mesh(new THREE.SphereGeometry(.13, 18, 14, 0, Math.PI * 2, 0, Math.PI * .6), hm); h.position.set(0, 1.54, -.01); h.rotation.x = -.45; g.add(h); const back = new THREE.Mesh(new THREE.CylinderGeometry(.11, .13, .22, 14, 1, true, Math.PI * .6, Math.PI * .8), hm); back.material = hm.clone(); back.material.side = THREE.DoubleSide; back.position.set(0, 1.42, -.02); g.add(back); }
+  if (beard) { const b = new THREE.Mesh(new THREE.SphereGeometry(.08, 12, 10), hm); b.scale.set(1, 1.1, .7); b.position.set(0, 1.44, .08); g.add(b); }
+  if (halo) { const ha = new THREE.Mesh(new THREE.TorusGeometry(.2, .012, 6, 32), M.gold); ha.position.set(0, 1.6, -.14); g.add(ha); }
+  const hands = [-1, 1].map(s => { const h = new THREE.Mesh(new THREE.SphereGeometry(.05, 12, 10), sk); g.add(h); return h; });
+  if (sym === 'heart') { hands[0].position.set(-.3, .95, .2); hands[1].position.set(.3, .95, .2); const ht = new THREE.Mesh(new THREE.SphereGeometry(.07, 14, 12), new THREE.MeshStandardMaterial({ color: '#d01818', emissive: '#a00000', emissiveIntensity: .6 })); ht.scale.set(1, 1.1, .7); ht.position.set(0, 1.18, .2); g.add(ht); const fl = new THREE.Mesh(new THREE.ConeGeometry(.035, .1, 8), new THREE.MeshStandardMaterial({ color: '#ffb000', emissive: '#ff8000', emissiveIntensity: .8 })); fl.position.set(0, 1.28, .2); g.add(fl); const th = new THREE.Mesh(new THREE.TorusGeometry(.06, .01, 6, 16), new THREE.MeshStandardMaterial({ color: '#4a3a1a' })); th.position.set(0, 1.18, .24); g.add(th); }
+  else if (sym === 'lily') { hands[0].position.set(-.08, 1.0, .26); hands[1].position.set(.1, 1.05, .25); const st = new THREE.Mesh(new THREE.CylinderGeometry(.008, .008, .6, 6), new THREE.MeshStandardMaterial({ color: '#3f8a4a' })); st.position.set(.12, 1.32, .27); st.rotation.z = -.15; g.add(st); for (let k = 0; k < 3; k++) { const fl = new THREE.Mesh(new THREE.ConeGeometry(.035, .09, 6, 1, true), new THREE.MeshStandardMaterial({ color: '#fffef6', side: THREE.DoubleSide })); fl.position.set(.15 + k * .02, 1.45 + k * .09, .27); fl.rotation.x = Math.PI; g.add(fl); } const ch = new THREE.Group(); ch.position.set(-.1, 1.08, .25); const cb = new THREE.Mesh(new THREE.CapsuleGeometry(.07, .16, 6, 12), new THREE.MeshStandardMaterial({ color: '#f6f1e6' })); ch.add(cb); const chh = new THREE.Mesh(new THREE.SphereGeometry(.065, 14, 12), sk); chh.position.y = .17; ch.add(chh); g.add(ch); }
+  else { hands[0].position.set(-.04, 1.06, .24); hands[1].position.set(.04, 1.06, .24); }
+  g.scale.setScalar(scale); g.traverse(o => { o.castShadow = true; });
+  return g;
+}
+function makePeterBronze() {
+  const g = new THREE.Group(); const b = MB.bronze;
+  box(.9, .9, .8, MB.marble, 0, .45, -.05, { parent: g }); box(1.0, .1, .9, M.gold, 0, .92, -.05, { parent: g, cast: false });
+  box(.8, .1, .7, b, 0, 1.25, -.05, { parent: g }); box(.62, .62, .08, b, 0, 1.6, -.36, { parent: g }); box(.66, .05, .1, M.gold, 0, 1.93, -.36, { parent: g, cast: false });
+  const body = new THREE.Mesh(L([[0, 0], [.3, 0], [.28, .3], [.24, .6], [.19, .78], [.12, .86], [0, .88]]), b); body.position.y = 1.28; g.add(body);
+  const lap = new THREE.Mesh(new THREE.BoxGeometry(.5, .2, .5), b); lap.position.set(0, 1.4, .18); g.add(lap);
+  const legs = new THREE.Mesh(new THREE.BoxGeometry(.46, .55, .18), b); legs.position.set(0, 1.1, .38); g.add(legs);
+  const foot = new THREE.Mesh(new THREE.CapsuleGeometry(.05, .14, 4, 10), new THREE.MeshStandardMaterial({ color: '#c99a5a', metalness: .85, roughness: .2 })); foot.rotation.x = Math.PI / 2; foot.position.set(.12, .97, .52); g.add(foot);
+  const hd = new THREE.Mesh(new THREE.SphereGeometry(.12, 18, 14), b); hd.position.set(0, 2.28, .02); g.add(hd); const bd = new THREE.Mesh(new THREE.SphereGeometry(.08, 12, 10), b); bd.scale.set(1, 1.1, .7); bd.position.set(0, 2.2, .08); g.add(bd);
+  const ha = new THREE.Mesh(new THREE.TorusGeometry(.19, .015, 6, 28), M.gold); ha.position.set(0, 2.34, -.12); g.add(ha);
+  const ra = new THREE.Mesh(new THREE.CapsuleGeometry(.04, .32, 4, 8), b); ra.position.set(.26, 1.98, .12); ra.rotation.z = -.35; g.add(ra); const rh = new THREE.Mesh(new THREE.SphereGeometry(.05, 10, 8), b); rh.position.set(.32, 2.16, .14); g.add(rh);
+  const key = new THREE.Group(); key.add(new THREE.Mesh(new THREE.CylinderGeometry(.015, .015, .4, 8), M.gold)); const bow = new THREE.Mesh(new THREE.TorusGeometry(.05, .014, 6, 14), M.gold); bow.position.y = .23; key.add(bow); key.position.set(-.2, 1.72, .26); key.rotation.z = .35; g.add(key);
   g.traverse(o => o.castShadow = true); return g;
 }
-for (const [nz, kind] of [[-3, 'key'], [9, 'sword']]) {
-  const fr = new THREE.Mesh(new THREE.ShapeGeometry(archShape(1.9, 4.0), 16), MB.marble); fr.position.set(W - .03, .7, nz); fr.rotation.y = -Math.PI / 2; world.add(fr);
-  const inn = new THREE.Mesh(new THREE.ShapeGeometry(archShape(1.5, 3.7), 16), MB.red); inn.position.set(W - .05, .8, nz); inn.rotation.y = -Math.PI / 2; world.add(inn);
-  box(.6, 1.1, 1.1, MB.marble, W - .35, .55, nz); const st = makeSaint(kind); st.position.set(W - .4, 1.1, nz); st.rotation.y = -Math.PI / 2; st.scale.setScalar(1.25); world.add(st); markPick(st, 'saint', { kind });
-  addCollider(W - .7, W, nz - .6, nz + .6);
+function pedestal(x, z, h, r = .45) { const p = new THREE.Mesh(new THREE.CylinderGeometry(r, r + .08, h, 24), MB.marble); p.position.set(x, h / 2, z); world.add(p); const t = new THREE.Mesh(new THREE.CylinderGeometry(r + .06, r + .06, .08, 24), M.gold); t.position.set(x, h, z); world.add(t); addCollider(x - r - .1, x + r + .1, z - r - .1, z + r + .1); return p; }
+function votiveRack(x, z, ry, rows = 3, per = 9) {
+  const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry; world.add(g);
+  const wm = new THREE.MeshStandardMaterial({ color: '#3a2a1c', metalness: .6, roughness: .4 });
+  for (let t = 0; t < rows; t++) box(1.8, .55 + t * .16, .22, wm, 0, (.55 + t * .16) / 2, -t * .22, { parent: g });
+  for (let t = 0; t < rows; t++) for (let i = 0; i < per; i++) { if (Math.random() < .25) continue; const cx = -.8 + i * (1.6 / (per - 1)); const cup = new THREE.Mesh(new THREE.CylinderGeometry(.045, .04, .1, 10), cupMatDeco); cup.position.set(cx, .55 + t * .16 + .05, -t * .22); g.add(cup); const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex(C.flame), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); fl.scale.set(.05, .1, 1); fl.position.set(cx, .55 + t * .16 + .15, -t * .22); g.add(fl); decoFlames.push(fl); }
+  return g;
 }
-// upper right windows (symmetry)
-for (const wz of [-8.6, -3, 3, 9, 15]) { const wm = new THREE.Mesh(new THREE.ShapeGeometry(archShape(1.6, 2.4), 16), M.win); wm.position.set(W - .03, 6.0, wz); wm.rotation.y = -Math.PI / 2; world.add(wm); }
+const cupMatDeco = new THREE.MeshStandardMaterial({ color: '#b3231c', transparent: true, opacity: .85, roughness: .2, emissive: '#ff4a20', emissiveIntensity: .8 });
 
-// ---------- Pietà chapel (right side, behind glass) ----------
-const CHAPEL_Z = 3;
+// side altar helper (aisle front ends)
+function sideAltar(xc, kind) {
+  const z = -12;
+  const fr = new THREE.Mesh(new THREE.ShapeGeometry(archShape(3.0, 5.6), 20), MB.marble); fr.position.set(xc, 0, z + .02); world.add(fr);
+  const inn = new THREE.Mesh(new THREE.ShapeGeometry(archShape(2.4, 5.2), 20), MB.stars); inn.position.set(xc, .05, z + .04); world.add(inn);
+  for (const s of [-1, 1]) { const c = new THREE.Mesh(new THREE.CylinderGeometry(.13, .15, 4.6, 16), MB.porph); c.position.set(xc + s * 1.35, 2.3 + .4, z + .3); world.add(c); box(.36, .2, .36, M.gold, xc + s * 1.35, 5.1, z + .3); }
+  box(3.4, .3, .5, MB.marble, xc, 5.35, z + .3);
+  const al = box(2.2, 1.0, .8, MB.marble, xc, .5, z + .45); box(2.3, .06, .9, M.cloth, xc, 1.03, z + .45, { cast: false }); box(1.0, .5, .02, M.gold, xc, .55, z + .86, { cast: false });
+  box(.7, .45, .5, MB.marble, xc, 1.28, z + .35);
+  for (const s of [-1, 1]) { const c = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, .35, 8), M.white); c.position.set(xc + s * .85, 1.24, z + .5); world.add(c); const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex(C.flame), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); fl.scale.set(.05, .1, 1); fl.position.set(xc + s * .85, 1.46, z + .5); world.add(fl); decoFlames.push(fl);
+    for (let k = 0; k < 4; k++) { const f = new THREE.Mesh(new THREE.SphereGeometry(rand(.06, .1), 8, 6), new THREE.MeshStandardMaterial({ color: kind === 'fatima' ? pick(['#f6f1e6', '#a9c8f0', '#ffffff']) : pick(['#ffffff', '#f6f1e6', '#ffd166']), roughness: .8 })); f.position.set(xc + s * .5 + rand(-.15, .15), 1.15 + rand(0, .3), z + .5); world.add(f); } }
+  let st;
+  if (kind === 'fatima') { st = makeFatima(); st.scale.setScalar(1.15); }
+  else st = makeStatue({ robe: '#6b6a3a', mantle: '#7a4a2a', hair: '#6a5a4a', beard: true, sym: 'lily', scale: 1.15 });
+  st.position.set(xc, 1.5, z + .4); world.add(st); markPick(st, kind); markPick(al, kind);
+  const sp = new THREE.SpotLight('#fff1d6', 14, 10, .45, .6, 1.4); sp.position.set(xc, 6.4, z + 4); sp.target.position.set(xc, 2.4, z + .4); world.add(sp, sp.target);
+  addCollider(xc - 1.7, xc + 1.7, z, z + .9);
+  votiveRack(xc + (xc > 0 ? -1.75 : 1.75) * 0, z + 1.75, 0, 2, 8);
+  addCollider(xc - .95, xc + .95, z + 1.3, z + 1.85);
+}
+sideAltar(-9.5, 'fatima');
+sideAltar(9.5, 'joseph');
+
+// Sacred Heart (left aisle) and St Peter bronze (right aisle) — freestanding
+{ pedestal(-9.4, 1.0, 1.05); const sh = makeStatue({ robe: '#f4f0e8', mantle: '#9e2a2b', hair: '#5a3a24', beard: true, sym: 'heart', scale: 1.2 }); sh.position.set(-9.4, 1.09, 1.0); sh.rotation.y = Math.PI / 2; world.add(sh); markPick(sh, 'heart');
+  const sp = new THREE.SpotLight('#fff1d6', 10, 9, .4, .6, 1.4); sp.position.set(-7.6, 6.6, 2.4); sp.target.position.set(-9.4, 2.2, 1.0); world.add(sp, sp.target);
+  votiveRack(-8.45, 1.0, Math.PI / 2, 2, 6); addCollider(-9.0, -8.3, .05, 1.95); }
+{ const pt = makePeterBronze(); pt.position.set(9.5, 0, -1.0); pt.rotation.y = -Math.PI / 2; pt.scale.setScalar(1.2); world.add(pt); markPick(pt, 'peter'); addCollider(9.0, 10.0, -1.6, -.4);
+  const sp = new THREE.SpotLight('#ffe8c8', 12, 9, .4, .6, 1.4); sp.position.set(7.6, 6.6, .4); sp.target.position.set(9.5, 2.0, -1.0); world.add(sp, sp.target); }
+
+// confessionals
+function confessional(x, z, face) {
+  const g = new THREE.Group(); g.position.set(x + face * 1.1, 0, z); g.rotation.y = face > 0 ? Math.PI / 2 : -Math.PI / 2; world.add(g);
+  const wd = M.wood;
+  box(3.0, 2.5, 1.1, wd, 0, 1.25, -.55, { parent: g });
+  box(1.1, .5, 1.15, wd, 0, 2.75, -.55, { parent: g }); const tri = new THREE.Mesh(new THREE.ConeGeometry(.75, .45, 3), wd); tri.rotation.set(0, 0, 0); tri.scale.set(1, 1, .25); tri.position.set(0, 3.2, -.05); g.add(tri);
+  box(.05, .45, .05, M.gold, 0, 3.6, 0, { parent: g }); box(.24, .05, .05, M.gold, 0, 3.66, 0, { parent: g });
+  box(.9, 2.0, .04, M.woodDark, 0, 1.1, .02, { parent: g });
+  for (let k = 0; k < 4; k++) box(.6, .04, .02, M.gold, 0, 1.4 + k * .12, .05, { parent: g, cast: false });
+  for (const s of [-1, 1]) { const cu = new THREE.Mesh(new THREE.PlaneGeometry(.8, 1.9), MB.purple); cu.position.set(s * 1.0, 1.1, .02); g.add(cu); }
+  markPick(g, 'confession');
+  const lx = face > 0 ? [x, x + 1.15] : [x - 1.15, x]; addCollider(lx[0], lx[1], z - 1.55, z + 1.55);
+}
+confessional(-W, 9.8, 1);
+confessional(W, 9.6, -1);
+
+// baptismal font (left aisle, near the entrance)
+{ const f = new THREE.Group(); f.position.set(-9.4, 0, 16.2); world.add(f);
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(.5, .6, .8, 8), MB.marble); base.position.y = .4; f.add(base);
+  const bowl = new THREE.Mesh(new THREE.CylinderGeometry(.75, .55, .35, 8), MB.marble); bowl.position.y = .97; f.add(bowl);
+  const lid = new THREE.Mesh(new THREE.SphereGeometry(.7, 8, 6, 0, Math.PI * 2, 0, Math.PI / 2), MB.bronze); lid.position.y = 1.15; f.add(lid);
+  const cr = new THREE.Group(); box(.05, .4, .05, M.gold, 0, 0, 0, { parent: cr }); box(.22, .05, .05, M.gold, 0, .08, 0, { parent: cr }); cr.position.y = 2.05; f.add(cr);
+  markPick(f, 'baptism'); addCollider(-10.25, -8.55, 15.35, 17.05); }
+
+// Pietà chapel (recessed beyond the right aisle wall, behind glass)
+const CHAPEL_Z = (CHAPEL.z0 + CHAPEL.z1) / 2;
 {
-  const fr = new THREE.Mesh(new THREE.ShapeGeometry(archShape(4.2, 5.4), 24), M.gold); fr.position.set(W - .02, .0, CHAPEL_Z); fr.rotation.y = -Math.PI / 2; world.add(fr);
-  const inn = new THREE.Mesh(new THREE.ShapeGeometry(archShape(3.8, 5.1), 24), new THREE.MeshStandardMaterial({ color: '#efe4cf', emissive: '#ffe8c0', emissiveIntensity: .35, roughness: .9 })); inn.position.set(W - .04, .02, CHAPEL_Z); inn.rotation.y = -Math.PI / 2; world.add(inn);
-  // side walls of the chapel recess
-  for (const s of [-1, 1]) box(1.4, 5.1, .14, MB.marble, W - .7, 2.55, CHAPEL_Z + s * 1.97);
-  box(1.4, .9, 3.4, MB.marble, W - .7, .45, CHAPEL_Z); // pedestal
-  box(1.45, .1, 3.5, M.gold, W - .72, .92, CHAPEL_Z, { cast: false });
-  // protective glass
-  const gl = new THREE.Mesh(new THREE.PlaneGeometry(3.9, 4.6), new THREE.MeshPhysicalMaterial({ color: '#dfe9ee', transparent: true, opacity: .1, roughness: .05, metalness: 0, side: THREE.DoubleSide, depthWrite: false })); gl.position.set(W - 1.45, 2.3, CHAPEL_Z); gl.rotation.y = -Math.PI / 2; world.add(gl);
-  box(.06, .06, 3.94, M.gold, W - 1.45, 4.6, CHAPEL_Z, { cast: false }); box(.06, .06, 3.94, M.gold, W - 1.45, .05, CHAPEL_Z, { cast: false });
+  const cm = new THREE.MeshStandardMaterial({ color: '#efe4cf', roughness: .9, side: THREE.DoubleSide, emissive: '#ffe8c0', emissiveIntensity: .12 });
+  plane(CHAPEL.x - W, CHAPEL.z1 - CHAPEL.z0, MB.floor, (W + CHAPEL.x) / 2, .01, CHAPEL_Z, 0, -Math.PI / 2);
+  wallX(CHAPEL.x, CHAPEL.z0, CHAPEL.z1, 0, 5.3, -1, cm);
+  wallZ(CHAPEL.z0, W, CHAPEL.x, 0, 5.3, 1, cm); wallZ(CHAPEL.z1, W, CHAPEL.x, 0, 5.3, -1, cm);
+  plane(CHAPEL.x - W, CHAPEL.z1 - CHAPEL.z0, MB.stars, (W + CHAPEL.x) / 2, 5.3, CHAPEL_Z, 0, Math.PI / 2);
+  const ar = new THREE.Mesh(new THREE.ShapeGeometry(archShape(3.2, 4.8), 20), new THREE.MeshStandardMaterial({ color: '#6a1c1c', roughness: .85, emissive: '#3a0a0a', emissiveIntensity: .35 })); ar.position.set(CHAPEL.x - .02, .3, CHAPEL_Z); ar.rotation.y = -Math.PI / 2; world.add(ar);
+  const fr = new THREE.Mesh(new THREE.ShapeGeometry(archShape(4.0, 5.3), 20), M.gold); fr.position.set(W - .01, 0, CHAPEL_Z); fr.rotation.y = -Math.PI / 2;
+  const frH = new THREE.Path(); // gold arch outline as a thin ring using two shapes
+  const ring = new THREE.Shape(); ring.moveTo(-2.15, 0); ring.lineTo(-1.9, 0); ring.lineTo(-1.9, 5.3 - 1.9); ring.absarc(0, 5.3 - 1.9, 1.9, Math.PI, 0, true); ring.lineTo(1.9, 0); ring.lineTo(2.15, 0); ring.lineTo(2.15, 5.3 - 1.9); ring.absarc(0, 5.3 - 1.9, 2.15, 0, Math.PI, false); ring.lineTo(-2.15, 0);
+  const rg = new THREE.Mesh(new THREE.ShapeGeometry(ring, 20), M.gold); rg.position.set(W - .03, 0, CHAPEL_Z); rg.rotation.y = -Math.PI / 2; world.add(rg);
+  box(1.6, .9, 3.0, MB.marble, CHAPEL.x - 1.1, .45, CHAPEL_Z); box(1.65, .08, 3.05, M.gold, CHAPEL.x - 1.1, .92, CHAPEL_Z, { cast: false });
+  const gl = new THREE.Mesh(new THREE.PlaneGeometry(CHAPEL.z1 - CHAPEL.z0, 5.0), new THREE.MeshPhysicalMaterial({ color: '#dfe9ee', transparent: true, opacity: .1, roughness: .05, side: THREE.DoubleSide, depthWrite: false })); gl.position.set(W + .05, 2.5, CHAPEL_Z); gl.rotation.y = -Math.PI / 2; world.add(gl);
+  box(.05, .05, CHAPEL.z1 - CHAPEL.z0, M.gold, W + .05, 5.0, CHAPEL_Z, { cast: false });
 }
 function makePieta() {
   const g = new THREE.Group(); const m = MB.pieta;
-  const L = (pts, seg = 36) => new THREE.LatheGeometry(pts.map(p => new THREE.Vector2(...p)), seg);
   const rock = new THREE.Mesh(new THREE.BoxGeometry(1.9, .28, 1.15), m); rock.position.y = .14; g.add(rock);
-  const robe = new THREE.Mesh(L([[0, 0], [.86, 0], [.8, .16], [.6, .48], [.4, .82], [.25, 1.06], [.17, 1.22], [0, 1.25]]), m); robe.scale.set(1, 1, .72); robe.position.set(0, .28, -.14); g.add(robe);
+  const robe = new THREE.Mesh(L([[0, 0], [.86, 0], [.8, .16], [.6, .48], [.4, .82], [.25, 1.06], [.17, 1.22], [0, 1.25]], 36), m); robe.scale.set(1, 1, .72); robe.position.set(0, .28, -.14); g.add(robe);
   const lap = new THREE.Mesh(new THREE.CapsuleGeometry(.25, 1.0, 8, 18), m); lap.rotation.z = Math.PI / 2; lap.scale.set(1, 1, 1.35); lap.position.set(0, .7, .16); g.add(lap);
   const hg = new THREE.Group(); hg.position.set(0, 1.58, -.06); hg.rotation.x = .38; g.add(hg);
   hg.add(new THREE.Mesh(new THREE.SphereGeometry(.13, 20, 16), m));
@@ -796,97 +1054,46 @@ function makePieta() {
   const cap = (r, l, x, y, z, rz) => { const k = new THREE.Mesh(new THREE.CapsuleGeometry(r, l, 6, 14), m); k.position.set(x, y, z); k.rotation.z = rz; c.add(k); return k; };
   cap(.13, .5, -.1, 0, 0, Math.PI / 2);
   const ch = new THREE.Mesh(new THREE.SphereGeometry(.105, 16, 12), m); ch.position.set(-.6, -.1, .03); c.add(ch);
-  cap(.085, .4, .42, -.02, 0, Math.PI / 2 - .12);
-  cap(.068, .46, .74, -.33, .06, .28);
-  cap(.046, .44, -.18, -.3, .17, .06);
+  cap(.085, .4, .42, -.02, 0, Math.PI / 2 - .12); cap(.068, .46, .74, -.33, .06, .28); cap(.046, .44, -.18, -.3, .17, .06);
   const cloth = new THREE.Mesh(new THREE.CylinderGeometry(.14, .12, .18, 12), m); cloth.rotation.z = Math.PI / 2; cloth.position.set(.17, -.01, 0); c.add(cloth);
   const h1 = new THREE.Mesh(new THREE.SphereGeometry(.06, 12, 10), m); h1.position.set(-.48, .98, .18); g.add(h1);
   const h2 = new THREE.Mesh(new THREE.SphereGeometry(.06, 12, 10), m); h2.position.set(.55, 1.12, .3); h2.scale.set(1, 1.3, .6); g.add(h2);
   g.traverse(o => { o.castShadow = true; o.receiveShadow = true; });
   return g;
 }
-{ const pt = makePieta(); pt.position.set(W - .78, .97, CHAPEL_Z); pt.rotation.y = -Math.PI / 2; pt.scale.setScalar(1.1); world.add(pt); markPick(pt, 'pieta'); addCollider(W - 1.45, W, CHAPEL_Z - 2.1, CHAPEL_Z + 2.1); }
-const pietaSpot = new THREE.SpotLight('#fff1dc', 24, 9, .5, .6, 1.4); pietaSpot.position.set(W - 3.4, 5.4, CHAPEL_Z + .6); pietaSpot.target.position.set(W - .8, 1.6, CHAPEL_Z); world.add(pietaSpot, pietaSpot.target);
-
-// offering candle stand in front of the Pietà
+{ const pt = makePieta(); pt.position.set(CHAPEL.x - 1.15, .97, CHAPEL_Z); pt.rotation.y = -Math.PI / 2; pt.scale.setScalar(1.15); world.add(pt); markPick(pt, 'pieta'); }
+const pietaSpot = new THREE.SpotLight('#fff1dc', 22, 9, .5, .6, 1.4); pietaSpot.position.set(W - 1.0, 5.0, CHAPEL_Z + .8); pietaSpot.target.position.set(CHAPEL.x - 1.1, 1.6, CHAPEL_Z); world.add(pietaSpot, pietaSpot.target);
+// interactive offering candles in front of the Pietà
 const NICHE_Z = CHAPEL_Z;
-const STAND = { x: W - 2.0, z: CHAPEL_Z, slots: [] };
+const STAND = { x: W - .75, z: CHAPEL_Z, slots: [] };
 {
   const g = new THREE.Group(); g.position.set(STAND.x, 0, STAND.z); world.add(g);
   const wm = new THREE.MeshStandardMaterial({ color: '#3a2a1c', metalness: .55, roughness: .4 });
-  for (let t = 0; t < 3; t++) box(.24, .55 + t * .18, 2.8, wm, -.22 + t * .22, (.55 + t * .18) / 2, 0, { parent: g });
-  for (let t = 0; t < 3; t++) for (let i = 0; i < 12; i++) STAND.slots.push(new THREE.Vector3(STAND.x - .22 + t * .22, .55 + t * .18, STAND.z - 1.25 + i * (2.5 / 11)));
-  box(.04, .22, 1.0, M.gold, -.36, .4, 0, { parent: g });
-  markPick(g, 'stand'); addCollider(STAND.x - .36, W, STAND.z - 1.45, STAND.z + 1.45);
+  for (let t = 0; t < 3; t++) box(.22, .55 + t * .16, 2.6, wm, -.22 + t * .22, (.55 + t * .16) / 2, 0, { parent: g });
+  for (let t = 0; t < 3; t++) for (let i = 0; i < 12; i++) STAND.slots.push(new THREE.Vector3(STAND.x - .22 + t * .22, .55 + t * .16, STAND.z - 1.15 + i * (2.3 / 11)));
+  box(.04, .22, 1.0, M.gold, -.34, .4, 0, { parent: g });
+  markPick(g, 'stand'); addCollider(STAND.x - .36, W + .2, STAND.z - 1.35, STAND.z + 1.35);
 }
 const standLight = new THREE.PointLight('#ffb35c', 0, 7, 1.6); standLight.position.set(STAND.x - .7, 1.3, STAND.z); world.add(standLight);
-
-// ---------- sanctuary ----------
-box(2 * W, .9, 7, MB.marble, 0, .45, -16.5, { cast: false });
-box(2 * W, .6, .4, MB.marble, 0, .3, -12.8, { cast: false });
-box(2 * W, .3, .4, MB.marble, 0, .15, -12.4, { cast: false });
-box(2 * W, .05, .05, M.gold, 0, .91, -13.0, { cast: false });
-// Gloria window above the apse
-{ const gp = new THREE.Mesh(new THREE.PlaneGeometry(9.5, 9.5), MB.gloria); gp.position.set(0, 16.4, ZF + .15); gp.scale.setScalar(1.1); world.add(gp); markPick(gp, 'gloria');
-  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex(C.glow), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: .55 })); glow.scale.set(7, 7, 1); glow.position.set(0, 16.4, ZF + .5); world.add(glow);
-  // bronze cathedra beneath
-  { const th = new THREE.Mesh(new THREE.ExtrudeGeometry(archShape(2.4, 3.6), { depth: .3, bevelEnabled: false }), M.gold); th.position.set(0, 5.6, ZF + .2); world.add(th); const ins = new THREE.Mesh(new THREE.ShapeGeometry(archShape(1.8, 3.0), 16), MB.red); ins.position.set(0, 5.85, ZF + .52); world.add(ins); }
-  for (const s of [-1, 1]) { const col = new THREE.Mesh(new THREE.CylinderGeometry(.35, .38, 10, 20), MB.marble); col.position.set(s * 5.6, 5.9, ZF + .5); world.add(col); box(1.0, .5, 1.0, M.gold, s * 5.6, 11.1, ZF + .5); }
-}
-// altar under the baldacchino
-function solomonic(r, h, turns = 3) {
-  const g = new THREE.CylinderGeometry(r, r * 1.06, h, 28, 90); const p = g.attributes.position; const f = turns * Math.PI * 2 / h;
-  for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i), z = p.getZ(i); const th = Math.atan2(z, x); const rr = Math.hypot(x, z) * (1 + .1 * Math.sin(th * 4 - (y + h / 2) * f * 4)); const ox = Math.cos((y + h / 2) * f) * r * .32, oz = Math.sin((y + h / 2) * f) * r * .32; p.setXYZ(i, Math.cos(th) * rr + ox, y, Math.sin(th) * rr + oz); }
-  g.computeVertexNormals(); return g;
-}
-{
-  const a = box(3.0, 1.05, 1.3, MB.marble, 0, 1.43, -16.2); box(3.1, .08, 1.4, M.gold, 0, 1.99, -16.2, { cast: false }); box(2.0, .6, .02, M.gold, 0, 1.4, -15.54, { cast: false }); markPick(a, 'altar');
-  for (let i = 0; i < 6; i++) { const x = -1.25 + i * .5; const st = new THREE.Mesh(new THREE.CylinderGeometry(.05, .09, .5, 10), M.gold); st.position.set(x, 2.28, -16.55); world.add(st); const c = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, .35, 8), M.white); c.position.set(x, 2.7, -16.55); world.add(c); }
-  const cr = new THREE.Group(); box(.06, .9, .04, M.gold, 0, 0, 0, { parent: cr }); box(.45, .06, .04, M.gold, 0, .2, 0, { parent: cr }); cr.position.set(0, 2.55, -16.55); world.add(cr);
-  const H = 7.6, y0 = .9 + .9;
-  for (const sx of [-2.3, 2.3]) for (const sz of [-18.2, -14.2]) {
-    box(1.0, .9, 1.0, MB.marble, sx, .9 + .45, sz); box(1.1, .1, 1.1, M.gold, sx, y0, sz, { cast: false });
-    const col = new THREE.Mesh(solomonic(.26, H), MB.bronze); col.position.set(sx, y0 + H / 2, sz); col.castShadow = true; world.add(col);
-    for (let k = 1; k < 4; k++) { const band = new THREE.Mesh(new THREE.TorusGeometry(.36, .04, 6, 20), M.gold); band.rotation.x = Math.PI / 2; band.position.set(sx, y0 + k * H / 4, sz); world.add(band); }
-    box(.75, .5, .75, M.gold, sx, y0 + H + .25, sz);
-    addCollider(sx - .5, sx + .5, sz - .5, sz + .5);
-  }
-  const top = y0 + H + .5;
-  box(5.4, .8, 4.8, MB.bronze, 0, top + .4, -16.2); box(5.6, .14, 5.0, M.gold, 0, top + .86, -16.2, { cast: false });
-  for (let i = 0; i < 18; i++) { const x = -2.6 + i * (5.2 / 17); for (const z of [-13.78, -18.62]) { const sc = new THREE.Mesh(new THREE.CircleGeometry(.16, 12, 0, Math.PI), M.gold); sc.rotation.z = Math.PI; sc.position.set(x, top - .02, z); if (z < -16) sc.rotation.y = Math.PI; world.add(sc); } }
-  const peak = new THREE.Vector3(0, top + 3.0, -16.2);
-  for (const [cx, cz] of [[-2.5, -14.0], [2.5, -14.0], [-2.5, -18.4], [2.5, -18.4]]) { const a2 = new THREE.Vector3(cx, top + .9, cz); const len = a2.distanceTo(peak); const rib = new THREE.Mesh(new THREE.CylinderGeometry(.09, .14, len, 10), MB.bronze); rib.position.copy(a2).lerp(peak, .5); rib.lookAt(peak); rib.rotateX(Math.PI / 2); world.add(rib); }
-  const globe = new THREE.Mesh(new THREE.SphereGeometry(.35, 20, 16), M.gold); globe.position.copy(peak); world.add(globe);
-  box(.08, .9, .08, M.gold, 0, peak.y + .75, -16.2); box(.5, .08, .08, M.gold, 0, peak.y + .9, -16.2);
-}
-// ambo, paschal candle, tabernacle + red lamp
-box(.7, 1.25, .5, M.lightwood, -4.6, .9 + .62, -14.2); box(.8, .06, .6, M.lightwood, -4.6, 2.18, -14.25);
-{ const pc = new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, 1.2, 12), M.white); pc.position.set(-5.6, 2.1, -14.6); world.add(pc); box(.3, .6, .3, M.gold, -5.6, 1.2, -14.6); }
-box(.6, 1.0, .5, MB.marble, 4.4, 1.4, -19.2); box(.5, .5, .4, M.gold, 4.4, 2.15, -19.2);
-{ const lamp = new THREE.Mesh(new THREE.SphereGeometry(.08, 12, 10), M.red); lamp.position.set(5.3, 2.4, -19.6); world.add(lamp); box(.04, .04, .3, M.gold, 5.3, 2.4, -19.75); const pl = new THREE.PointLight('#ff3020', .6, 3, 2); pl.position.set(5.3, 2.4, -19.4); world.add(pl); }
-// Our Lady of Fátima (side altar, front right)
 function makeFatima() {
   const g = new THREE.Group();
   const robe = new THREE.MeshStandardMaterial({ color: '#f7f4ee', roughness: .5 });
   const skin = new THREE.MeshStandardMaterial({ color: '#efd6bf', roughness: .5 });
-  const prof = [[0, 0], [.34, 0], [.33, .08], [.29, .5], [.23, 1.0], [.2, 1.25], [.14, 1.38], [0, 1.4]].map(p => new THREE.Vector2(...p));
-  g.add(new THREE.Mesh(new THREE.LatheGeometry(prof, 32), robe));
-  const vprof = [[.36, .1], [.34, .6], [.27, 1.1], [.2, 1.45], [.16, 1.62], [.08, 1.72], [0, 1.74]].map(p => new THREE.Vector2(...p));
-  const veil = new THREE.Mesh(new THREE.LatheGeometry(vprof, 32, Math.PI * .3, Math.PI * 1.4), robe.clone()); veil.material.side = THREE.DoubleSide; g.add(veil);
+  g.add(new THREE.Mesh(L([[0, 0], [.34, 0], [.33, .08], [.29, .5], [.23, 1.0], [.2, 1.25], [.14, 1.38], [0, 1.4]]), robe));
+  const veil = new THREE.Mesh(L([[.36, .1], [.34, .6], [.27, 1.1], [.2, 1.45], [.16, 1.62], [.08, 1.72], [0, 1.74]], 32, Math.PI * .3, Math.PI * 1.4), robe.clone()); veil.material.side = THREE.DoubleSide; g.add(veil);
   const head = new THREE.Mesh(new THREE.SphereGeometry(.12, 20, 16), skin); head.position.set(0, 1.53, .03); g.add(head);
   const hands = new THREE.Mesh(new THREE.SphereGeometry(.06, 12, 10), skin); hands.position.set(0, 1.08, .24); hands.scale.set(1, 1.6, .7); g.add(hands);
   const crown = new THREE.Mesh(new THREE.CylinderGeometry(.13, .11, .12, 16, 1, true), M.gold); crown.position.y = 1.72; g.add(crown);
   for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; const sp = new THREE.Mesh(new THREE.ConeGeometry(.025, .09, 6), M.gold); sp.position.set(Math.sin(a) * .12, 1.82, Math.cos(a) * .12); g.add(sp); }
   const hem = new THREE.Mesh(new THREE.TorusGeometry(.335, .012, 6, 40), M.gold); hem.rotation.x = Math.PI / 2; hem.position.y = .04; g.add(hem);
   const rosary = new THREE.Mesh(new THREE.TorusGeometry(.07, .008, 6, 20), M.gold); rosary.position.set(0, .95, .26); rosary.rotation.x = 1.2; g.add(rosary);
+  const star = new THREE.Mesh(new THREE.OctahedronGeometry(.035), M.gold); star.position.set(0, .4, .3); g.add(star);
   g.traverse(o => { o.castShadow = true; });
   return g;
 }
-{ const ped = box(.8, .9, .8, MB.marble, 7.8, .9 + .45, -14.4); const f = makeFatima(); f.position.set(7.8, 1.8, -14.4); f.scale.setScalar(1.2); f.rotation.y = -.35; world.add(f); markPick(f, 'fatima'); markPick(ped, 'fatima');
-  for (let i = 0; i < 10; i++) { const fl = new THREE.Mesh(new THREE.SphereGeometry(rand(.07, .11), 8, 6), new THREE.MeshStandardMaterial({ color: pick(['#ffd166', '#f6f1e6', '#b07ad1', '#ff9fb2']), roughness: .8 })); fl.position.set(7.8 + rand(-.6, .6), 1.0 + rand(0, .3), -13.7 + rand(-.2, .2)); world.add(fl); } }
-const fatimaLight = new THREE.SpotLight('#fff1d6', 9, 9, .35, .6, 1.4); fatimaLight.position.set(6.6, 8.6, -12.4); fatimaLight.target.position.set(7.8, 2.6, -14.4); world.add(fatimaLight, fatimaLight.target);
+const fatimaLight = null;
 
-// pews
+/* ---------- pews ---------- */
 const pewSeats = [];
 for (let i = 0; i < PEW_ROWS; i++) {
   const z = PEW_Z0 + i * PEW_DZ;
@@ -898,71 +1105,63 @@ for (let i = 0; i < PEW_ROWS; i++) {
     box(len, .06, .14, M.wood, cx, .96, z + .28, { parent: g });
     box(len, .26, .05, M.woodDark, cx, .56, z + .31, { parent: g });
     box(len, .1, .2, M.woodDark, cx, .12, z - .55, { parent: g, cast: false });
-    for (const e of [x0, x1]) { box(.07, .92, .62, M.wood, e, .46, z + .03, { parent: g }); const fin = new THREE.Mesh(new THREE.SphereGeometry(.06, 10, 8), M.gold); fin.position.set(e, .98, z + .28); g.add(fin); }
+    for (const e of [x0, x1]) { box(.07, .92, .62, M.wood, e, .46, z + .03, { parent: g }); }
+    { const e = x0; const cr = new THREE.Group(); box(.025, .14, .02, M.gold, 0, 0, 0, { parent: cr }); box(.08, .025, .02, M.gold, 0, .03, 0, { parent: cr }); cr.position.set(e, .7, z - .29); g.add(cr); }
     markPick(g, 'pew', { row: i, side });
     addCollider(x0, x1, z - .25, z + .36);
-    for (let k = 0; k < 6; k++) pewSeats.push({ row: i, side, x: side * (PX0 + .5 + k * ((PX1 - PX0 - 1) / 5)), z });
+    for (let k = 0; k < 5; k++) pewSeats.push({ row: i, side, x: side * (PX0 + .45 + k * ((PX1 - PX0 - .9) / 4)), z });
   }
 }
-
-// back: bronze doors, organ loft
-plane(3.4, 4.2, M.door, 0, 2.1, ZB - .02, Math.PI);
-{ const fr = new THREE.Mesh(new THREE.ShapeGeometry(archShape(4.2, 5.2), 16), MB.marble); fr.position.set(0, 0, ZB - .01); fr.rotation.y = Math.PI; world.add(fr); }
-{
-  box(2 * W, .35, 3.4, MB.marble, 0, 5.4, ZB - 1.7);
-  for (const s of [-1, 1]) { const c = new THREE.Mesh(new THREE.CylinderGeometry(.28, .3, 5.25, 18), MB.marble); c.position.set(s * 6, 2.62, ZB - 3.4); world.add(c); addCollider(s * 6 - .3, s * 6 + .3, ZB - 3.7, ZB - 3.1); }
-  box(2 * W, .9, .08, M.gold, 0, 6.0, ZB - 3.4);
-  for (let i = 0; i < 26; i++) { const h = 1.4 + Math.sin(i / 25 * Math.PI) * 3.2 + (i % 2) * .3; const p = new THREE.Mesh(new THREE.CylinderGeometry(.09, .09, h, 10), M.gold); p.position.set(-4.4 + i * .35, 5.6 + h / 2, ZB - .6); world.add(p); }
-}
-// holy water fonts (shell basins)
-for (const s of [-1, 1]) { const f = new THREE.Group(); f.position.set(s * 2.9, 0, ZB - 1.2); world.add(f);
+// holy water fonts at the door
+for (const s of [-1, 1]) { const f = new THREE.Group(); f.position.set(s * 2.6, 0, ZB - 1.0); world.add(f);
   const ped = new THREE.Mesh(new THREE.CylinderGeometry(.12, .2, .95, 16), MB.marble); ped.position.y = .48; f.add(ped);
-  const bowl = new THREE.Mesh(new THREE.SphereGeometry(.34, 20, 10, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), MB.marble); bowl.position.y = 1.12; f.add(bowl);
-  const water = new THREE.Mesh(new THREE.CircleGeometry(.31, 24), new THREE.MeshStandardMaterial({ color: '#9fc4d6', metalness: .4, roughness: .05 })); water.rotation.x = -Math.PI / 2; water.position.y = 1.09; f.add(water);
-  markPick(f, 'font'); addCollider(s * 2.9 - .36, s * 2.9 + .36, ZB - 1.56, ZB - .84); }
+  const bowl = new THREE.Mesh(new THREE.SphereGeometry(.32, 20, 10, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), MB.marble); bowl.position.y = 1.12; f.add(bowl);
+  const water = new THREE.Mesh(new THREE.CircleGeometry(.29, 24), new THREE.MeshStandardMaterial({ color: '#9fc4d6', metalness: .4, roughness: .05 })); water.rotation.x = -Math.PI / 2; water.position.y = 1.09; f.add(water);
+  markPick(f, 'font'); addCollider(s * 2.6 - .34, s * 2.6 + .34, ZB - 1.34, ZB - .66); }
 
-// stations of the cross
+/* ---------- stations of the cross (outer aisle walls) ---------- */
 const STATIONS = ['예수님께서 사형 선고를 받으심', '예수님께서 십자가를 지심', '예수님께서 기력이 떨어져 넘어지심', '예수님께서 어머니를 만나심', '시몬이 예수님을 도와 십자가를 짐', '베로니카가 수건으로 예수님의 얼굴을 닦아 드림', '예수님께서 기력이 다하여 두 번째 넘어지심', '예수님께서 예루살렘 부인들을 위로하심', '예수님께서 세 번째 넘어지심', '예수님께서 옷 벗김 당하심', '예수님께서 십자가에 못 박히심', '예수님께서 십자가 위에서 숨을 거두심', '제자들이 예수님의 시신을 십자가에서 내림', '예수님께서 무덤에 묻히심'];
 const stationPos = [];
-[-9.3, -7.6, -4.2, -1.6, 1.8, 4.2, 7.8].forEach((z, i) => stationPos.push({ n: i + 1, x: -W + .04, z, ry: Math.PI / 2, ax: -W + 1.4, az: z }));
-[-10.2, -8.0, -4.6, 4.6, 8.0, 10.2].forEach((x, i) => stationPos.push({ n: 8 + i, x, z: ZB - .04, ry: Math.PI, ax: x, az: ZB - 1.4 }));
-stationPos.push({ n: 14, x: W - .04, z: 15.0, ry: -Math.PI / 2, ax: W - 1.4, az: 15.0 });
-stationPos.sort((a, b) => a.n - b.n);
+const SZ = [-9, -6.5, -4, -1.5, 1, 3.5, 6];
+SZ.forEach((z, i) => stationPos.push({ n: i + 1, x: -W + .04, z: z + (z === 1 ? .0 : 0), ry: Math.PI / 2, ax: -W + 1.5, az: z }));
+[...SZ].reverse().forEach((z, i) => stationPos.push({ n: 8 + i, x: W - .04, z, ry: -Math.PI / 2, ax: W - 1.5, az: z }));
 for (const s of stationPos) {
   const m = new THREE.MeshStandardMaterial({ map: tex(stationCanvas(s.n), 1, 1), roughness: .8 });
-  const p = new THREE.Mesh(new THREE.BoxGeometry(.82, 1.02, .05), [M.gold, M.gold, M.gold, M.gold, m, M.gold]);
-  p.position.set(s.x + Math.sin(s.ry) * .03, 1.85, s.z + Math.cos(s.ry) * .03); p.rotation.y = s.ry; world.add(p);
+  const p = new THREE.Mesh(new THREE.BoxGeometry(.7, .88, .05), [M.gold, M.gold, M.gold, M.gold, m, M.gold]);
+  p.position.set(s.x + Math.sin(s.ry) * .03, 1.7, s.z + Math.cos(s.ry) * .03); p.rotation.y = s.ry; world.add(p);
+  const cr = new THREE.Group(); box(.03, .22, .03, M.gold, 0, 0, 0, { parent: cr }); box(.12, .03, .03, M.gold, 0, .05, 0, { parent: cr }); cr.position.set(s.x + Math.sin(s.ry) * .06, 2.3, s.z + Math.cos(s.ry) * .06); cr.rotation.y = s.ry; world.add(cr);
   markPick(p, 'station', { n: s.n });
 }
 
-// bronze lanterns hanging in the nave
+/* ---------- chandeliers ---------- */
 const pendantMats = [];
-for (const x of [-5.4, 5.4]) for (const z of [-6, 1, 8, 15]) {
-  const yTop = WH + Math.sqrt(W * W - x * x);
-  const cord = new THREE.Mesh(new THREE.CylinderGeometry(.015, .015, yTop - 7.2, 4), M.gold); cord.position.set(x, (yTop + 7.2) / 2, z); world.add(cord);
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(.55, .04, 8, 28), M.gold); ring.rotation.x = Math.PI / 2; ring.position.set(x, 7.0, z); world.add(ring);
-  for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; const b = new THREE.Mesh(new THREE.SphereGeometry(.07, 10, 8), M.lampWarm.clone()); b.position.set(x + Math.cos(a) * .55, 7.12, z + Math.sin(a) * .55); world.add(b); pendantMats.push(b.material); }
+for (const x of [-3.6, 3.6]) for (const z of [-6, 2, 10]) {
+  const cord = new THREE.Mesh(new THREE.CylinderGeometry(.015, .015, NH - 9.2, 4), M.gold); cord.position.set(x, (NH + 9.2) / 2, z); world.add(cord);
+  for (const [r, y] of [[.7, 9.0], [.45, 9.35]]) { const ring = new THREE.Mesh(new THREE.TorusGeometry(r, .035, 8, 28), M.gold); ring.rotation.x = Math.PI / 2; ring.position.set(x, y, z); world.add(ring);
+    const n = r > .6 ? 10 : 6; for (let k = 0; k < n; k++) { const a = k / n * Math.PI * 2; const b = new THREE.Mesh(new THREE.SphereGeometry(.06, 10, 8), M.lampWarm.clone()); b.position.set(x + Math.cos(a) * r, y + .1, z + Math.sin(a) * r); world.add(b); pendantMats.push(b.material); } }
 }
+for (const s of [-1, 1]) for (const z of [-7, 1, 9, 16]) { const y = 5.2; const cord = new THREE.Mesh(new THREE.CylinderGeometry(.01, .01, AH - y, 4), M.gold); cord.position.set(s * 9.5, (AH + y) / 2, z); world.add(cord); const lan = new THREE.Mesh(new THREE.CylinderGeometry(.14, .1, .35, 8), M.lampWarm.clone()); lan.position.set(s * 9.5, y, z); world.add(lan); pendantMats.push(lan.material); }
 
-// dust motes in the light
+/* ---------- incense haze / motes ---------- */
 const motes = (() => {
-  const n = 420, pos = new Float32Array(n * 3);
-  for (let i = 0; i < n; i++) { pos[i * 3] = rand(-10, 10); pos[i * 3 + 1] = rand(.5, 12); pos[i * 3 + 2] = rand(-19, 18); }
+  const n = 520, pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) { pos[i * 3] = rand(-11, 11); pos[i * 3 + 1] = rand(.5, 12.5); pos[i * 3 + 2] = rand(-24, 18); }
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   const m = new THREE.PointsMaterial({ size: .05, map: tex(C.glow), transparent: true, opacity: .5, depthWrite: false, blending: THREE.AdditiveBlending, color: '#ffe8c0' });
   const p = new THREE.Points(g, m); world.add(p); return p;
 })();
 
 /* ---------- lights ---------- */
-const hemi = new THREE.HemisphereLight('#fff3e0', '#5a3a28', .55); scene.add(hemi);
-const sun = new THREE.DirectionalLight('#fff1dc', 1.4); sun.position.set(-10, 24, 2); sun.target.position.set(2, 0, 0); scene.add(sun, sun.target);
-sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -16, right: 16, top: 24, bottom: -24, near: 1, far: 70 }); sun.shadow.bias = -.0006; sun.shadow.normalBias = .03;
-const crossSpot = new THREE.SpotLight('#ffe0b0', 30, 34, .3, .5, 1.1); crossSpot.position.set(0, RH + 5, -15.5); crossSpot.target.position.set(0, 1.9, -16.2); scene.add(crossSpot, crossSpot.target);
-const altarLight = new THREE.PointLight('#ffd7a0', 6, 11, 1.4); altarLight.position.set(0, 4.2, -14.6); scene.add(altarLight);
-const gloriaLight = new THREE.PointLight('#ffc46a', 22, 20, 1.3); gloriaLight.position.set(0, 14, -18.2); scene.add(gloriaLight);
-const naveFill = new THREE.PointLight('#ffcf9a', 0, 34, 1.1); naveFill.position.set(0, 7.2, -3); scene.add(naveFill);
-const naveFill2 = new THREE.PointLight('#ffcf9a', 0, 30, 1.1); naveFill2.position.set(0, 7.2, 12); scene.add(naveFill2);
+const hemi = new THREE.HemisphereLight('#fff3e0', '#5a3a28', .5); scene.add(hemi);
+const sun = new THREE.DirectionalLight('#fff1dc', 1.3); sun.position.set(-14, 26, 4); sun.target.position.set(2, 0, -2); scene.add(sun, sun.target);
+sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -18, right: 18, top: 26, bottom: -26, near: 1, far: 70 }); sun.shadow.bias = -.0006; sun.shadow.normalBias = .03;
+const crossSpot = new THREE.SpotLight('#ffe6c0', 40, 22, .32, .5, 1.1); crossSpot.position.set(0, 4.5, -3.5); crossSpot.target.position.set(0, 10, -12.3); scene.add(crossSpot, crossSpot.target);
+const altarLight = new THREE.PointLight('#ffd7a0', 8, 12, 1.4); altarLight.position.set(0, 4.6, -15.2); scene.add(altarLight);
+const apseLight = new THREE.PointLight('#ffd08a', 16, 14, 1.3); apseLight.position.set(0, 6.5, -21); scene.add(apseLight);
+const naveFill = new THREE.PointLight('#ffcf9a', 0, 34, 1.1); naveFill.position.set(0, 8.5, -3); scene.add(naveFill);
+const naveFill2 = new THREE.PointLight('#ffcf9a', 0, 30, 1.1); naveFill2.position.set(0, 8.5, 11); scene.add(naveFill2);
 const amb = new THREE.AmbientLight('#ffe6c8', .22); scene.add(amb);
+const gloriaLight = apseLight;
 
 /* =========================================================
    time of day
@@ -976,14 +1175,14 @@ function applySky(h) {
   const sk = col.clone().multiplyScalar(.35 + .9 * day + .2 * golden);
   skyMats.forEach(m => m.color.copy(sk));
   M.win.color.copy(col.clone().multiplyScalar(.45 + .75 * day));
-  M.glass.emissiveIntensity = .28 + .9 * day + .25 * golden;
+  glassMats.forEach(m => m.emissiveIntensity = .3 + .85 * day + .25 * golden);
   sun.intensity = .05 + 1.7 * day; sun.color.copy(new THREE.Color('#fff1dc').lerp(cDawn, golden));
   hemi.intensity = .2 + .5 * day; hemi.color.copy(col);
   const night = 1 - day;
   naveFill.intensity = 55 * night + 6; naveFill2.intensity = 40 * night + 4; amb.intensity = .18 + .22 * night;
   pendantMats.forEach(m => m.color.setScalar(.25 + .9 * night).multiply(new THREE.Color('#ffe2b0')));
   crossSpot.intensity = 18 + 26 * night;
-  shafts.forEach(s => { s.material.opacity = s.userData.pool ? .04 + .11 * day : (.03 + .2 * day) * (1 - golden * .3); s.material.color.copy(col); });
+  shafts.forEach(s => { s.material.opacity = s.userData.pool ? .04 + .11 * day : (.03 + .2 * day) * (1 - golden * .3); if (!s.userData.keepColor) s.material.color.copy(col); });
   M.door.emissiveIntensity = .25 + .7 * day;
   scene.background.copy(new THREE.Color('#0d0a08').lerp(new THREE.Color('#2a1f17'), day));
   scene.fog.color.copy(scene.background);
@@ -1388,16 +1587,26 @@ function handleClick(cx, cy) {
   const p = new THREE.Vector3(); if (ray.ray.intersectPlane(floorPlane, p)) walkTo(clamp(p.x, BOUNDS.x0, BOUNDS.x1), clamp(p.z, BOUNDS.z0, BOUNDS.z1));
 }
 function onPick(pk, point) {
+  const go = (x, z, yaw, then) => walkTo(x, z, () => { player.yaw = yaw; then && then(); });
+  const bow = () => { player.state = 'bow'; player.anim = { kind: 'bow', t: 0, dur: 1.8, then: () => { player.state = 'pray'; setPrayLabel(); } }; };
   switch (pk.action) {
     case 'pew': sitAt(pk.row, pk.side, point.x); break;
     case 'stand': { const n = candles.length; openCard('봉헌초', '피에타 앞 봉헌초', `지금 ${n}개의 초가 타오르고 있어요.\n초는 하루 동안 이 자리에서 타올라요.\n\n“고통의 어머니, 저의 간절한 기도를 들어주소서.”`, [['초 봉헌하기', () => { closeCard(); startCandle(); }]]); break; }
-    case 'pieta': openCard('오른편 경당', '피에타', '십자가에서 내려진 아드님을 무릎에 안은 성모님이에요.\n성 베드로 대성전 오른편 첫 경당, 유리 너머에 모셔진 미켈란젤로의 피에타를 본떠 단순한 형태로 새로 빚었어요.\n\n“고통의 어머니, 저희를 위하여 빌어주소서.”', [['초 봉헌하기', () => { closeCard(); startCandle(); }], ['피에타 앞에서 기도하기', () => { closeCard(); walkTo(STAND.x - .95, STAND.z + .6, () => { player.yaw = Math.PI / 2; doPray(); }); }]]); break;
-    case 'saint': toast(pk.kind === 'key' ? '천국의 열쇠를 든 성 베드로 사도' : '말씀의 칼과 책을 든 성 바오로 사도', 2600); break;
-    case 'gloria': openCard('제대 뒤', '영광의 창', '성령을 상징하는 비둘기가 금빛 구름과 빛살에 둘러싸여 있어요. 성 베드로 대성전 앱스의 창을 떠올리며 만들었어요.\n\n“오소서, 성령님.”', []); break;
-    case 'fatima': openCard('제대 옆 경당', '파티마의 성모', '1917년 포르투갈 파티마에서 세 어린이에게 발현하시어 묵주기도를 당부하신 성모님이에요. 잠원동성당 제대 오른편에 모셔져 있어요.\n\n' + PR.fatima, [['성모님 앞으로 가기', () => { closeCard(); walkTo(6.9, -11.6, () => { player.yaw = Math.PI * .92; doPray(); }); }], ['묵주기도 시작', () => { closeCard(); openRosary(); }]]); break;
-    case 'crucifix': case 'altar': openCard('제대', '발다키노 아래 제대', '꼬인 청동 기둥 네 개가 받치는 닫집(발다키노) 아래 제대예요. 위로는 쿠폴라의 둥근 천창(오쿨루스)에서 빛이 곧게 내려오고, 정면 높이에는 영광의 창이 빛나요.', [['제대 앞에서 기도하기', () => { closeCard(); walkTo(0, -11.4, () => { player.yaw = Math.PI; doPray(); }); }]]); break;
+    case 'pieta': openCard('오른편 경당', '피에타', '십자가에서 내려진 아드님을 무릎에 안은 성모님이에요.\n성 베드로 대성전 오른편 첫 경당, 유리 너머에 모셔진 미켈란젤로의 피에타를 본떠 단순한 형태로 새로 빚었어요.\n\n“고통의 어머니, 저희를 위하여 빌어주소서.”', [['초 봉헌하기', () => { closeCard(); startCandle(); }], ['피에타 앞에서 기도하기', () => { closeCard(); go(STAND.x - .95, STAND.z + .6, Math.PI / 2, doPray); }]]); break;
+    case 'fatima': openCard('왼편 제대', '파티마의 성모', '1917년 포르투갈 파티마에서 세 어린이에게 발현하시어 묵주기도를 당부하신 성모님이에요. 잠원동성당의 주보이기도 해요.\n\n' + PR.fatima, [['성모님 앞으로 가기', () => { closeCard(); go(-9.5, -9.75, Math.PI, doPray); }], ['묵주기도 시작', () => { closeCard(); openRosary(); }]]); break;
+    case 'joseph': openCard('오른편 제대', '성 요셉', '아기 예수님과 순결의 백합을 든, 성모님의 배필 성 요셉이에요. 교회와 가정, 노동자의 수호성인이에요.\n\n“성 요셉, 저희를 위하여 빌어주소서.”', [['성 요셉 앞으로 가기', () => { closeCard(); go(9.5, -9.75, Math.PI, doPray); }]]); break;
+    case 'heart': openCard('왼편 회랑', '예수 성심', '사랑으로 불타는 마음을 드러내 보이신 예수님이에요. 6월은 예수 성심 성월이에요.\n\n“지극히 거룩하신 예수 성심이여, 저희를 불쌍히 여기소서.”', [['성심상 앞으로 가기', () => { closeCard(); go(-7.95, 2.45, -Math.PI * .75, doPray); }]]); break;
+    case 'peter': openCard('오른편 회랑', '성 베드로 청동상', '성 베드로 대성전의 청동 좌상을 본떠 만들었어요. 순례자들이 발에 손을 얹고 기도해 온 까닭에, 실제 상의 오른발은 닳아서 반들반들해요.\n\n“너는 베드로이다. 내가 이 반석 위에 내 교회를 세울 터인즉…” (마태 16,18)', [['발에 손 얹고 기도하기', () => { closeCard(); go(8.3, -1.0, Math.PI / 2, () => { player.state = 'water'; player.anim = { kind: 'water', t: 0, dur: 2.4, then: () => { player.state = 'pray'; setPrayLabel(); } }; caption('성 베드로', '“성 베드로 사도여, 저희를 위하여 빌어주소서.”', 4500); }); }]]); break;
+    case 'confession': openCard('회랑', '고해소', '하느님과 화해하는 고해성사가 이루어지는 곳이에요. 실제 고해성사는 성당에서 사제를 통해서만 받을 수 있어요.\n여기서는 마음속 짐을 적어 금빛 비둘기로 날려 보낼 수 있어요.', [['마음 내려놓기', () => { closeCard(); openWorry(); }]]); break;
+    case 'baptism': openCard('입구 곁', '세례대', '세례성사로 하느님의 자녀로 새로 태어나는 곳이에요. 성당 입구 가까이 두어 신앙의 시작을 떠올리게 해요.', [['세례 때의 약속 떠올리며 기도하기', () => { closeCard(); go(-9.4, 14.9, 0, doPray); }]]); break;
+    case 'tabernacle': openCard('제대 뒤', '감실과 성체등', '앱스의 높은 제대 위 금빛 감실은 성체가 모셔진 곳이에요. 곁의 붉은 성체등은 주님께서 계심을 알리며 늘 켜져 있어요.\n성당에 들어서면 감실을 향해 무릎을 꿇거나 깊이 고개 숙여 인사해요.', [['감실을 향해 절하기', () => { closeCard(); go(0, -10.9, Math.PI, bow); }]]); break;
+    case 'rood': openCard('개선 아치 아래', '십자고상', '성당 어디에서든 바라볼 수 있도록 높이 걸린 십자고상이에요. 금테 두른 나무 십자가에 상아빛 예수님을 모셨어요.\n\n“주님, 저희를 불쌍히 여기소서.”', [['십자가 앞에서 기도하기', () => { closeCard(); go(0, -10.9, Math.PI, doPray); }]]); break;
+    case 'altar': case 'crucifix': openCard('성당의 중심', '발다키노 아래 제대', '붉은 반암 기둥 네 개가 받치는 닫집(발다키노) 아래, 미사가 봉헌되는 제대예요. 앞에는 영성체 난간이, 뒤 앱스에는 감실이 있어요.', [['제대 앞에서 기도하기', () => { closeCard(); go(0, -10.9, Math.PI, doPray); }]]); break;
+    case 'apse': openCard('앱스', '금빛 모자이크', '아기 예수님을 안고 옥좌에 앉으신 성모님과, 열쇠를 든 성 베드로·백합을 든 성 요셉을 금빛 모자이크로 그렸어요. 로마 산타 마리아 마조레 대성전의 분위기를 빌렸어요.', []); break;
+    case 'rose': openCard('입구 위', '장미창', '입구 위 둥근 장미창 한가운데에 성령의 비둘기를 담았어요. 해가 들면 성당 안으로 색색의 빛이 번져요.\n\n“오소서, 성령님.”', []); break;
+    case 'glass': toast(`스테인드글라스 · ${pk.name}`, 2200); break;
     case 'station': { const s = stationPos.find(x => x.n === pk.n); openCard(`십자가의 길 · 제${pk.n}처`, STATIONS[pk.n - 1], '“주님, 저희를 불쌍히 여기소서.”\n\n각 처 앞에 서서 잠시 묵상해 보세요.', [['이 처 앞으로 가기', () => { closeCard(); walkTo(s.ax, s.az, () => { player.yaw = Math.atan2(s.x - s.ax, s.z - s.az); doPray(); }); }], ...(pk.n < 14 ? [['다음 처', () => { const nx = stationPos.find(x => x.n === pk.n + 1); onPick({ action: 'station', n: pk.n + 1 }); walkTo(nx.ax, nx.az, () => { player.yaw = Math.atan2(nx.x - nx.ax, nx.z - nx.az); }); }]] : [])]); break; }
-    case 'font': { const f = point.x < 0 ? -2.6 : 2.6; walkTo(f, ZB - 1.95, () => { player.yaw = 0; player.state = 'water'; player.anim = { kind: 'water', t: 0, dur: 2.6, then: () => { player.state = 'idle'; } }; Sound.water(); caption('성수', '성수를 찍어 성호를 그어요.<br>' + PR.cross, 4200); }); break; }
+    case 'font': { const f = point.x < 0 ? -2.6 : 2.6; walkTo(f, ZB - 1.85, () => { player.yaw = 0; player.state = 'water'; player.anim = { kind: 'water', t: 0, dur: 2.6, then: () => { player.state = 'idle'; } }; Sound.water(); caption('성수', '성수를 찍어 성호를 그어요.<br>' + PR.cross, 4200); }); break; }
     case 'peer': peerCard(pk.id); break;
     case 'npc': toast('조용히 기도하고 계세요', 1800); break;
   }
@@ -1657,6 +1866,7 @@ function update(dt, now) {
   // candles flicker
   const t = now / 1000;
   for (const g of candleObjs.values()) { const u = g.userData; const f = 1 + Math.sin(t * 13 + u.ph) * .08 + Math.sin(t * 7.3 + u.ph * 2) * .06; u.fl.scale.set(.06 * f, .12 * f, 1); u.gl.material.opacity = .35 + .1 * f; }
+  for (let i = 0; i < decoFlames.length; i++) { const f = decoFlames[i]; f.userData.h ??= f.scale.y; f.scale.y = f.userData.h * (1 + Math.sin(t * 12 + i * 1.7) * .09 + Math.sin(t * 7.1 + i) * .05); }
   standLight.intensity = candleObjs.size ? Math.min(6, .6 + candleObjs.size * .35) * (1 + Math.sin(t * 11) * .04) : 0;
   // doves
   for (let i = doves.length - 1; i >= 0; i--) { const d = doves[i]; d.t += dt / 7; const e = d.t; const pos = d.from.clone().lerp(d.to, e * e * (3 - 2 * e)); pos.x += Math.sin(e * 8 + d.sway) * .6 * (1 - e); pos.y += Math.sin(e * Math.PI) * 1.2; d.s.position.copy(pos); d.s.material.opacity = e < .1 ? e * 10 : e > .8 ? (1 - e) * 5 : 1; const sc = .7 + Math.sin(t * 9) * .08; d.s.scale.set(sc, sc * .8, 1); if (d.t >= 1) { scene.remove(d.s); doves.splice(i, 1); } }
@@ -1672,7 +1882,7 @@ function update(dt, now) {
   const seated = !!player.seat; const pit = seated ? Math.max(cam.pitch, .62) : cam.pitch, dst = seated ? Math.min(cam.dist, 4.4) : cam.dist;
   const cp = new THREE.Vector3(cam.target.x + Math.sin(cam.yaw) * Math.cos(pit) * dst, cam.target.y + Math.sin(pit) * dst, cam.target.z + Math.cos(cam.yaw) * Math.cos(pit) * dst);
   { const d = cp.clone().sub(cam.target); const len = d.length(); d.divideScalar(len); let tmax = len;
-    const lim = [[-W + .45, W - .45], [.5, 14], [ZF + 1, ZB - .45]]; const tg = [cam.target.x, cam.target.y, cam.target.z], dv = [d.x, d.y, d.z];
+    const inNave = Math.abs(cam.target.x) < NX - .3; const lim = [[inNave ? -NX + .5 : -W + .45, inNave ? NX - .5 : W - .45], [.5, inNave ? NH - .8 : AH - .4], [ZF + 1, ZB - .45]]; const tg = [cam.target.x, cam.target.y, cam.target.z], dv = [d.x, d.y, d.z];
     for (let a = 0; a < 3; a++) { if (dv[a] > 1e-4) tmax = Math.min(tmax, (lim[a][1] - tg[a]) / dv[a]); else if (dv[a] < -1e-4) tmax = Math.min(tmax, (lim[a][0] - tg[a]) / dv[a]); }
     cp.copy(cam.target).addScaledVector(d, Math.max(.8, tmax)); }
   camera.position.lerp(cp, Math.min(1, dt * 8)); camera.lookAt(cam.target);
@@ -1704,7 +1914,7 @@ $('#enter').onclick = () => {
   Sound.init(); setTimeout(() => Sound.toll(1, 0, 174), 600);
   cam.yaw = 0; camera.position.set(0, 3.4, 23);
   const hint = $('#hint'); hint.textContent = isTouch ? '바닥을 눌러 이동 · 쓸어서 둘러보기 · 두 손가락으로 확대' : '바닥 클릭 · WASD로 이동 · 드래그로 둘러보기 · 휠로 확대'; hint.classList.add('show'); setTimeout(() => hint.classList.remove('show'), 6500);
-  setTimeout(() => caption('바티칸 성당', '쿠폴라에서 내려오는 빛 아래, 말없이 함께 머물러요.<br>장의자에 앉거나, 오른편 피에타 앞에 초를 밝혀 보세요.', 6500), 1400);
+  setTimeout(() => caption('바티칸 성당', '십자고상 아래, 말없이 함께 머물러요.<br>장의자에 앉거나 성모님 제대, 오른편 피에타 경당에 초를 밝혀 보세요.', 6500), 1400);
 };
 window.__lux = { scene, player, peers, Net, act, walkTo, applySky, handleClick, pickTest: (cx, cy) => { ndc.set(cx / innerWidth * 2 - 1, -(cy / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera); return ray.intersectObjects([...pickables, ...world.children.filter(o => o.userData.floor)], true).slice(0, 4).map(h => { let o = h.object, pk = null; while (o && !pk) { pk = o.userData.pick; o = o.parent; } return { d: +h.distance.toFixed(2), pk: pk && pk.action, floor: !!h.object.userData.floor }; }); }, candles: () => candles, project: (x, y, z) => { const v = new THREE.Vector3(x, y, z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; } };
 </script>
