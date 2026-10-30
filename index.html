@@ -342,8 +342,8 @@ table.mass tr.today td{color:#fbe7c4}
   <header><h2>설정</h2><button class="close" data-close aria-label="닫기">✕</button></header>
   <h3 style="margin-top:0">내가 듣는 소리</h3>
   <div class="row"><span>전체 소리</span><input type="range" min="0" max="1" step="0.01" data-vol="master"></div>
-  <div class="row"><span>오르간<small>은은한 파이프오르간 화음</small></span><input type="range" min="0" max="1" step="0.01" data-vol="organ"></div>
-  <div class="row"><span>성당 공기<small>넓은 공간의 잔향</small></span><input type="range" min="0" max="1" step="0.01" data-vol="ambient"></div>
+  <div class="row"><span>오르간<small>멀리서 들려오는 부드러운 오르간</small></span><input type="range" min="0" max="1" step="0.01" data-vol="organ"></div>
+  <div class="row"><span>성당 울림<small>넓은 성전의 잔향</small></span><input type="range" min="0" max="1" step="0.01" data-vol="ambient"></div>
   <div class="row"><span>효과음<small>종, 초, 묵주 소리</small></span><input type="range" min="0" max="1" step="0.01" data-vol="sfx"></div>
   <div class="row"><span>백그라운드 재생<small id="bg-note">다른 탭으로 가면 소리가 멈춰요</small></span><button class="toggle" id="tg-bg"></button></div>
   <div class="row"><span>기도문 읽어주기<small>묵주기도 때 기도문을 소리로 읽어요</small></span><button class="toggle" id="tg-speak"></button></div>
@@ -459,7 +459,7 @@ const ROOM_NAMES = ['', '베드로 성전', '피에타 경당', '로사리오 �
 /* =========================================================
    settings
    ========================================================= */
-const settings = Object.assign({ master: .8, organ: .45, ambient: .5, sfx: .7, bg: false, speak: false, lite: isTouch, muted: false }, store.get('settings', {}));
+const settings = Object.assign({ master: .7, organ: .35, ambient: .5, sfx: .7, bg: false, speak: false, lite: isTouch, muted: false }, store.get('settings', {}));
 const saveSettings = () => store.set('settings', settings);
 
 /* =========================================================
@@ -1402,28 +1402,24 @@ const Sound = {
     if (this.ctx) return; const AC = window.AudioContext || window.webkitAudioContext; if (!AC) { toast('이 브라우저는 소리를 지원하지 않아요'); return; }
     const ctx = this.ctx = new AC();
     const master = ctx.createGain(); const comp = ctx.createDynamicsCompressor(); master.connect(comp).connect(ctx.destination);
-    const rev = ctx.createConvolver(); rev.buffer = this.impulse(5, 2.4); const revG = ctx.createGain(); revG.gain.value = .6; rev.connect(revG).connect(master);
+    const rev = ctx.createConvolver(); rev.buffer = this.impulse(6.5); const revG = ctx.createGain(); revG.gain.value = .6; rev.connect(revG).connect(master); this.revG = revG;
     this.buses.master = master; this.rev = rev;
-    for (const n of ['organ', 'ambient', 'sfx']) { const g = ctx.createGain(); g.connect(master); const send = ctx.createGain(); send.gain.value = n === 'ambient' ? .2 : .8; g.connect(send).connect(rev); this.buses[n] = g; }
-    this.applyVolumes(); this.ambient(); this.organ(); this.ready = true;
+    for (const n of ['organ', 'ambient', 'sfx']) { const g = ctx.createGain(); const dry = ctx.createGain(); dry.gain.value = n === 'organ' ? .4 : 1; g.connect(dry).connect(master); const send = ctx.createGain(); send.gain.value = n === 'organ' ? 1.1 : n === 'ambient' ? 0 : .7; g.connect(send).connect(rev); this.buses[n] = g; }
+    this.applyVolumes(); this.organ(); this.ready = true;
   },
-  applyVolumes() { if (!this.ctx) return; const t = this.ctx.currentTime; this.buses.master.gain.setTargetAtTime(settings.muted ? 0 : settings.master, t, .2); this.buses.organ.gain.setTargetAtTime(settings.organ * .5, t, .3); this.buses.ambient.gain.setTargetAtTime(settings.ambient * .35, t, .3); this.buses.sfx.gain.setTargetAtTime(settings.sfx, t, .1); },
-  impulse(sec, decay) { const c = this.ctx, len = c.sampleRate * sec, b = c.createBuffer(2, len, c.sampleRate); for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay); } return b; },
-  ambient() {
-    const c = this.ctx, len = c.sampleRate * 6, b = c.createBuffer(2, len, c.sampleRate);
-    for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch); let last = 0; for (let i = 0; i < len; i++) { const w = Math.random() * 2 - 1; last = (last + .02 * w) / 1.02; d[i] = last * 3.2; } }
-    const src = c.createBufferSource(); src.buffer = b; src.loop = true; const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 420; src.connect(lp).connect(this.buses.ambient); src.start();
-  },
+  applyVolumes() { if (!this.ctx) return; const t = this.ctx.currentTime; this.buses.master.gain.setTargetAtTime(settings.muted ? 0 : settings.master, t, .2); this.buses.organ.gain.setTargetAtTime(settings.organ, t, .3); this.revG.gain.setTargetAtTime(.25 + settings.ambient * .9, t, .3); this.buses.sfx.gain.setTargetAtTime(settings.sfx, t, .1); },
+  impulse(sec) { const c = this.ctx, len = Math.floor(c.sampleRate * sec), pre = Math.floor(c.sampleRate * .025), b = c.createBuffer(2, len, c.sampleRate); for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch); let lp = 0; for (let i = pre; i < len; i++) { const x = (i - pre) / (len - pre); const k = .55 - .5 * Math.pow(x, .6); lp += k * ((Math.random() * 2 - 1) - lp); d[i] = lp * Math.exp(-x * 5.2) * (1 - Math.exp(-(i - pre) / (c.sampleRate * .06))); } } return b; },
   organ() {
     const c = this.ctx;
-    const real = new Float32Array([0, 1, .55, .3, .22, .12, .08, .05, .03]); const wave = c.createPeriodicWave(real, new Float32Array(real.length));
-    const chords = [[48, 55, 60, 64, 67], [53, 57, 60, 65, 69], [50, 57, 62, 65, 69], [55, 59, 62, 67, 71], [48, 55, 60, 64, 67], [45, 52, 57, 60, 64], [53, 57, 60, 65, 72], [55, 59, 62, 65, 67], [48, 52, 55, 60, 64]];
-    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800; lp.connect(this.buses.organ);
-    let k = 0; const dur = 8;
+    // soft flute stops (Gedackt 8' + a whisper of 4'): round tone, no buzz
+    const real = new Float32Array([0, 1, .16, .05, .025, .01]); const wave = c.createPeriodicWave(real, new Float32Array(real.length));
+    const chords = [[48, 60, 64, 67], [48, 60, 65, 69], [45, 60, 64, 69], [41, 60, 65, 69], [43, 59, 62, 67], [48, 60, 64, 67], [40, 59, 64, 67], [45, 57, 60, 64], [38, 57, 62, 65], [43, 59, 62, 67], [43, 60, 62, 67], [48, 60, 64, 67]];
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 950; lp.Q.value = .3; lp.connect(this.buses.organ);
+    let k = 0; const dur = 11;
     const play = () => {
-      if (c.state !== 'running') return; const t = c.currentTime + .05; const ch = chords[k++ % chords.length];
-      ch.forEach((m, i) => { const o = c.createOscillator(); o.setPeriodicWave(wave); o.frequency.value = 440 * Math.pow(2, (m - 69) / 12) * (1 + (Math.random() - .5) * .002); const g = c.createGain(); const a = i === 0 ? .06 : .035;
-        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(a, t + 2.6); g.gain.setValueAtTime(a, t + dur - .4); g.gain.linearRampToValueAtTime(0, t + dur + 2.6); o.connect(g).connect(lp); o.start(t); o.stop(t + dur + 2.8); });
+      if (c.state !== 'running') return; const t0 = c.currentTime + .05; const ch = chords[k++ % chords.length];
+      ch.forEach((m, i) => { const t = t0 + i * .07 + Math.random() * .05; const o = c.createOscillator(); o.setPeriodicWave(wave); o.frequency.value = 440 * Math.pow(2, (m - 69) / 12) * (1 + (Math.random() - .5) * .0008); const g = c.createGain(); const a = i === 0 ? .03 : i === ch.length - 1 ? .016 : .02;
+        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(a, t + 3.8); g.gain.setValueAtTime(a, t + dur - 1); g.gain.linearRampToValueAtTime(0, t + dur + 3.5); o.connect(g).connect(lp); o.start(t); o.stop(t + dur + 3.7); });
     };
     play(); this.organTimer = setInterval(play, dur * 1000);
   },
