@@ -1701,7 +1701,7 @@ rvc.addEventListener('pointerdown', e => { if (e.clientX > innerWidth / 2) rvNex
 /* =========================================================
    input: camera orbit, click-to-move, keyboard, joystick
    ========================================================= */
-const cam = { yaw: 0, pitch: .32, dist: 6.2, target: new THREE.Vector3() };
+const cam = { yaw: 0, pitch: .2, dist: 6.6, target: new THREE.Vector3() };
 const keys = new Set();
 const pointers = new Map(); let dragMoved = 0, pinch0 = 0;
 canvas.addEventListener('pointerdown', e => { canvas.setPointerCapture(e.pointerId); pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY }); dragMoved = 0; if (pointers.size === 2) { const [a, b] = [...pointers.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y); } });
@@ -1885,7 +1885,7 @@ function update(dt, now) {
     const inNave = Math.abs(cam.target.x) < NX - .3; const lim = [[inNave ? -NX + .5 : -W + .45, inNave ? NX - .5 : W - .45], [.5, inNave ? NH - .8 : AH - .4], [ZF + 1, ZB - .45]]; const tg = [cam.target.x, cam.target.y, cam.target.z], dv = [d.x, d.y, d.z];
     for (let a = 0; a < 3; a++) { if (dv[a] > 1e-4) tmax = Math.min(tmax, (lim[a][1] - tg[a]) / dv[a]); else if (dv[a] < -1e-4) tmax = Math.min(tmax, (lim[a][0] - tg[a]) / dv[a]); }
     cp.copy(cam.target).addScaledVector(d, Math.max(.8, tmax)); }
-  camera.position.lerp(cp, Math.min(1, dt * 8)); camera.lookAt(cam.target);
+  camera.position.lerp(cp, Math.min(1, dt * 8)); camera.lookAt(cam.target.x, cam.target.y + (seated ? .2 : 1.15), cam.target.z);
   if (window.__luxCam) { camera.position.set(...window.__luxCam[0]); camera.lookAt(...window.__luxCam[1]); }
   Net.tick(now);
   if (Math.floor(now / 15000) !== update._bell) { update._bell = Math.floor(now / 15000); checkBells(); }
