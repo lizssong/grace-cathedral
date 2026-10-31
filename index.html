@@ -215,9 +215,17 @@ table.mass tr.today td{color:#fbe7c4}
 .stick i{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(245,234,214,.35)}
 @media (pointer:coarse){.stick.ready{display:block}}
 
+.now-playing{position:fixed;left:16px;top:calc(max(14px,env(safe-area-inset-top)) + 58px);z-index:9;font-size:12px;color:var(--ink-dim);padding:5px 11px;border-radius:12px;background:rgba(0,0,0,.28);backdrop-filter:blur(8px);opacity:0;transition:opacity 1.2s;pointer-events:none;font-family:var(--serif)}
+.now-playing.show{opacity:1}
+.now-playing i{font-style:normal;color:var(--gold);margin-right:4px}
+.now-playing small{color:var(--ink-faint);margin-left:5px;font-family:var(--sans);font-size:10.5px}
 .status-chip{position:fixed;right:14px;bottom:max(16px,env(safe-area-inset-bottom));z-index:9;font-size:11px;color:var(--ink-faint);padding:6px 10px;border-radius:12px;background:rgba(0,0,0,.25)}
 .actions span{white-space:nowrap}
-@media (max-width:720px){.status-chip{display:none}.brand .room{display:none}.brand b{display:none}
+@media (max-width:720px){.now-playing{position:fixed;left:16px;top:calc(max(14px,env(safe-area-inset-top)) + 58px);z-index:9;font-size:12px;color:var(--ink-dim);padding:5px 11px;border-radius:12px;background:rgba(0,0,0,.28);backdrop-filter:blur(8px);opacity:0;transition:opacity 1.2s;pointer-events:none;font-family:var(--serif)}
+.now-playing.show{opacity:1}
+.now-playing i{font-style:normal;color:var(--gold);margin-right:4px}
+.now-playing small{color:var(--ink-faint);margin-left:5px;font-family:var(--sans);font-size:10.5px}
+.status-chip{display:none}.brand .room{display:none}.brand b{display:none}
   .hud{left:10px;right:10px}.left-group{gap:6px}.pill{height:42px;padding:0 3px}.pill button{min-width:32px;padding:0 6px;height:34px}.icon-only{width:42px}
   .actions{gap:0;padding:4px}.actions button{min-width:56px;padding:7px 4px 5px;font-size:10.5px}.actions button svg{width:21px;height:21px}
   .sheet{right:10px;width:calc(100vw - 20px)}.sheet.left{left:10px}}
@@ -288,6 +296,7 @@ table.mass tr.today td{color:#fbe7c4}
 <div id="hint" class="hint"></div>
 <div id="stick" class="stick" aria-hidden="true"><i></i></div>
 <div id="status-chip" class="status-chip"></div>
+<div id="now-playing" class="now-playing" aria-live="off"></div>
 
 <!-- ============ ACTIONS ============ -->
 <nav class="actions" id="actions" hidden aria-label="성당에서 할 일">
@@ -342,7 +351,7 @@ table.mass tr.today td{color:#fbe7c4}
   <header><h2>설정</h2><button class="close" data-close aria-label="닫기">✕</button></header>
   <h3 style="margin-top:0">내가 듣는 소리</h3>
   <div class="row"><span>전체 소리</span><input type="range" min="0" max="1" step="0.01" data-vol="master"></div>
-  <div class="row"><span>오르간<small>멀리서 들려오는 부드러운 오르간</small></span><input type="range" min="0" max="1" step="0.01" data-vol="organ"></div>
+  <div class="row"><span>성가<small>잔잔한 어린이 성가 (합창·오르골)</small></span><input type="range" min="0" max="1" step="0.01" data-vol="organ"></div>
   <div class="row"><span>성당 울림<small>넓은 성전의 잔향</small></span><input type="range" min="0" max="1" step="0.01" data-vol="ambient"></div>
   <div class="row"><span>효과음<small>종, 초, 묵주 소리</small></span><input type="range" min="0" max="1" step="0.01" data-vol="sfx"></div>
   <div class="row"><span>백그라운드 재생<small id="bg-note">다른 탭으로 가면 소리가 멈춰요</small></span><button class="toggle" id="tg-bg"></button></div>
@@ -1410,18 +1419,61 @@ const Sound = {
   applyVolumes() { if (!this.ctx) return; const t = this.ctx.currentTime; this.buses.master.gain.setTargetAtTime(settings.muted ? 0 : settings.master, t, .2); this.buses.organ.gain.setTargetAtTime(settings.organ, t, .3); this.revG.gain.setTargetAtTime(.25 + settings.ambient * .9, t, .3); this.buses.sfx.gain.setTargetAtTime(settings.sfx, t, .1); },
   impulse(sec) { const c = this.ctx, len = Math.floor(c.sampleRate * sec), pre = Math.floor(c.sampleRate * .025), b = c.createBuffer(2, len, c.sampleRate); for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch); let lp = 0; for (let i = pre; i < len; i++) { const x = (i - pre) / (len - pre); const k = .55 - .5 * Math.pow(x, .6); lp += k * ((Math.random() * 2 - 1) - lp); d[i] = lp * Math.exp(-x * 5.2) * (1 - Math.exp(-(i - pre) / (c.sampleRate * .06))); } } return b; },
   organ() {
+    // 잔잔한 어린이 성가: 저작권이 만료된 공개 선율을 아이 합창 "우-" 소리와 오르골로 부드럽게 연주
     const c = this.ctx;
-    // soft flute stops (Gedackt 8' + a whisper of 4'): round tone, no buzz
-    const real = new Float32Array([0, 1, .16, .05, .025, .01]); const wave = c.createPeriodicWave(real, new Float32Array(real.length));
-    const chords = [[48, 60, 64, 67], [48, 60, 65, 69], [45, 60, 64, 69], [41, 60, 65, 69], [43, 59, 62, 67], [48, 60, 64, 67], [40, 59, 64, 67], [45, 57, 60, 64], [38, 57, 62, 65], [43, 59, 62, 67], [43, 60, 62, 67], [48, 60, 64, 67]];
-    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 950; lp.Q.value = .3; lp.connect(this.buses.organ);
-    let k = 0; const dur = 11;
-    const play = () => {
-      if (c.state !== 'running') return; const t0 = c.currentTime + .05; const ch = chords[k++ % chords.length];
-      ch.forEach((m, i) => { const t = t0 + i * .07 + Math.random() * .05; const o = c.createOscillator(); o.setPeriodicWave(wave); o.frequency.value = 440 * Math.pow(2, (m - 69) / 12) * (1 + (Math.random() - .5) * .0008); const g = c.createGain(); const a = i === 0 ? .03 : i === ch.length - 1 ? .016 : .02;
-        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(a, t + 3.8); g.gain.setValueAtTime(a, t + dur - 1); g.gain.linearRampToValueAtTime(0, t + dur + 3.5); o.connect(g).connect(lp); o.start(t); o.stop(t + dur + 3.7); });
+    const flute = c.createPeriodicWave(new Float32Array([0, 1, .16, .05, .025, .01]), new Float32Array(6));
+    const out = c.createGain(); out.gain.value = 1; out.connect(this.buses.organ);
+    const padLP = c.createBiquadFilter(); padLP.type = 'lowpass'; padLP.frequency.value = 900; padLP.Q.value = .3; padLP.connect(out);
+    // children's choir "oo" formant chain
+    const f1 = c.createBiquadFilter(); f1.type = 'bandpass'; f1.frequency.value = 380; f1.Q.value = 3.2;
+    const f2 = c.createBiquadFilter(); f2.type = 'bandpass'; f2.frequency.value = 900; f2.Q.value = 5;
+    const fl = c.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = 1500; fl.Q.value = .4;
+    const choirIn = c.createGain(); const g1 = c.createGain(); g1.gain.value = 1.4; const g2 = c.createGain(); g2.gain.value = .55; const g3 = c.createGain(); g3.gain.value = .35;
+    choirIn.connect(f1).connect(g1).connect(out); choirIn.connect(f2).connect(g2).connect(out); choirIn.connect(fl).connect(g3).connect(out);
+    const mtf = m => 440 * Math.pow(2, (m - 69) / 12);
+    const CH = { C: [48, 60, 64, 67], C7: [48, 58, 64, 67], F: [41, 57, 60, 65], Bb: [46, 58, 62, 65], G: [43, 55, 59, 62], G7: [43, 53, 59, 62], D: [38, 54, 57, 62], D7: [38, 54, 57, 60], Am: [45, 57, 60, 64], Em: [40, 55, 59, 64] };
+    // [midi|null, beats]  — beats in quarter notes
+    const SONGS = [
+      { title: '루르드의 아베 마리아', note: '루르드 성지의 성모 찬가 (전통 선율, 1873)', bpm: 84, shift: 0,
+        mel: [[62, 1], [67, 1], [67, 1], [71, 1], [67, 1], [67, 1], [71, 1], [69, 1], [69, 1], [71, .5], [69, .5], [67, 2], [62, 1], [67, 1], [67, 1], [71, 1], [67, 1], [67, 1], [71, 1], [69, 1], [69, 1], [71, .5], [69, .5], [67, 2], [null, 1], [72, 2], [72, 1], [71, 2], [71, 1], [69, 1], [69, 1], [69, 1], [74, 2], [67, 1], [72, 2], [72, 1], [71, 1], [71, 1], [71, 1], [69, 2], [71, .5], [69, .5], [67, 3]],
+        ch: [[null, 1], ['G', 3], ['G', 3], ['D7', 3], ['G', 3], ['G', 3], ['C', 3], ['D7', 3], ['G', 3], ['C', 3], ['G', 3], ['D', 3], ['G', 3], ['C', 3], ['G', 3], ['D7', 3], ['G', 3]] },
+      { title: '예수 사랑하심은', note: '어린이 찬미가 (W. B. 브래드버리, 1862)', bpm: 92, shift: 0,
+        mel: [[67, 1], [64, 1], [64, 1], [62, 1], [64, 1], [67, 1], [67, 2], [69, 1], [69, 1], [72, 1], [69, 1], [69, 1], [67, 1], [67, 2], [67, 1], [64, 1], [64, 1], [62, 1], [64, 1], [67, 1], [67, 2], [69, 1], [69, 1], [67, 1], [60, 1], [64, 1], [62, 1], [60, 2], [67, 2], [64, 1], [67, 1], [69, 1], [72, 3], [67, 2], [64, 1], [60, 1], [64, 1], [62, 3], [67, 2], [64, 1], [67, 1], [69, 1], [72, 2], [69, 1], [67, 1], [60, 1], [64, 1], [62, 1], [60, 4]],
+        ch: [['C', 4], ['C', 4], ['F', 4], ['C', 4], ['C', 4], ['C', 4], ['F', 2], ['C', 2], ['G7', 2], ['C', 2], ['C', 4], ['F', 4], ['C', 4], ['G', 4], ['C', 4], ['F', 4], ['C', 2], ['G7', 2], ['C', 4]] },
+      { title: '그 어린 주 예수', note: '성탄 어린이 성가 (J. R. 머리, 1887)', bpm: 88, shift: 0, season: 'xmas',
+        mel: [[60, 1], [65, 1], [65, 1], [67, .5], [69, .5], [65, 1], [65, 1], [69, .5], [70, .5], [72, 1], [72, 1], [74, 1], [70, 2], [67, .5], [69, .5], [70, 1], [70, 1], [72, 1], [69, 1], [69, 1], [65, .5], [69, .5], [67, 1], [62, 1], [65, 1], [64, 2], [60, 1], [65, 1], [65, 1], [67, .5], [69, .5], [65, 1], [65, 1], [69, .5], [70, .5], [72, 1], [72, 1], [74, 1], [70, 2], [67, .5], [69, .5], [70, 1], [70, 1], [72, 1], [69, 1], [69, 1], [65, .5], [69, .5], [67, 1], [62, 1], [64, 1], [65, 3]],
+        ch: [[null, 1], ['F', 3], ['F', 3], ['F', 2], ['Bb', 1], ['Bb', 3], ['C7', 3], ['F', 3], ['C7', 3], ['C', 3], ['F', 3], ['F', 3], ['F', 2], ['Bb', 1], ['Bb', 3], ['C7', 3], ['F', 3], ['C7', 3], ['F', 3]] },
+      { title: '고요한 밤 거룩한 밤', note: '성탄 성가 (F. X. 그루버, 1818)', bpm: 66, shift: 0, season: 'xmas',
+        mel: [[67, .75], [69, .25], [67, .5], [64, 1.5], [67, .75], [69, .25], [67, .5], [64, 1.5], [74, 1], [74, .5], [71, 1.5], [72, 1], [72, .5], [67, 1.5], [69, 1], [69, .5], [72, .75], [71, .25], [69, .5], [67, .75], [69, .25], [67, .5], [64, 1.5], [69, 1], [69, .5], [72, .75], [71, .25], [69, .5], [67, .75], [69, .25], [67, .5], [64, 1.5], [74, 1], [74, .5], [77, .75], [74, .25], [71, .5], [72, 1.5], [76, 1.5], [72, .75], [67, .25], [64, .5], [67, .75], [65, .25], [62, .5], [60, 3]],
+        ch: [['C', 3], ['C', 3], ['G7', 3], ['C', 3], ['F', 3], ['C', 3], ['F', 3], ['C', 3], ['G7', 3], ['C', 3], ['C', 1.5], ['G7', 1.5], ['C', 3]] },
+    ];
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' })); const mo = now.getMonth() + 1, dd = now.getDate();
+    const xmas = mo === 12 || (mo === 1 && dd <= 13);
+    const list = SONGS.filter(s => !s.season || xmas);
+    const voices = (t, m, dur, amp) => { // soft children's choir: 3 slightly detuned singers
+      for (let v = 0; v < 3; v++) {
+        const st = t + v * .012 + Math.random() * .02; const o = c.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtf(m); o.detune.value = (v - 1) * 7 + (Math.random() - .5) * 3;
+        const vib = c.createOscillator(); vib.frequency.value = 4.6 + v * .3; const vg = c.createGain(); vg.gain.setValueAtTime(0, st); vg.gain.linearRampToValueAtTime(4, st + Math.min(.6, dur * .6)); vib.connect(vg).connect(o.detune);
+        const g = c.createGain(); const a = amp / 3; g.gain.setValueAtTime(0, st); g.gain.linearRampToValueAtTime(a, st + .14); g.gain.setTargetAtTime(a * .8, st + .2, .4); g.gain.setTargetAtTime(0, st + dur - .02, .16);
+        o.connect(g).connect(choirIn); o.start(st); o.stop(st + dur + 1); vib.start(st); vib.stop(st + dur + 1);
+      }
     };
-    play(); this.organTimer = setInterval(play, dur * 1000);
+    const musicBox = (t, m, amp) => {
+      for (const [r, a, d] of [[1, 1, 2.4], [2, .22, 1.2], [3.98, .08, .5], [6.1, .03, .25]]) { const o = c.createOscillator(); o.type = 'sine'; o.frequency.value = mtf(m) * r; const g = c.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(amp * a, t + .004); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g).connect(out); o.start(t); o.stop(t + d + .05); }
+    };
+    const pad = (t, name, dur) => { if (!name) return; CH[name].forEach((m, i) => { const st = t + i * .05; const o = c.createOscillator(); o.setPeriodicWave(flute); o.frequency.value = mtf(m); const g = c.createGain(); const a = i === 0 ? .016 : .011; g.gain.setValueAtTime(0, st); g.gain.linearRampToValueAtTime(a, st + .6); g.gain.setValueAtTime(a, st + Math.max(.6, dur - .3)); g.gain.linearRampToValueAtTime(0, st + dur + .9); o.connect(g).connect(padLP); o.start(st); o.stop(st + dur + 1); }); };
+    let idx = 0, play = 0; this.songEnd = 0;
+    const startSong = () => {
+      const s = list[idx % list.length]; const style = play % 2 === 0 ? 'choir' : 'box'; idx += style === 'box' ? 1 : 0; play++;
+      const q = 60 / s.bpm * (style === 'box' ? 1.06 : 1); let t = c.currentTime + .4; const t0 = t;
+      for (const [name, b] of s.ch) { pad(t, name, b * q); t += b * q; }
+      t = t0;
+      for (const [m, b] of s.mel) { const d = b * q; if (m != null) { if (style === 'choir') { voices(t, m, d * .96, .05); if (b >= 1) musicBox(t, m + 12, .012); } else musicBox(t, m + 12, .045); } t += d; }
+      this.songEnd = t; this.nowPlaying = s;
+      const np = document.getElementById('now-playing'); if (np) { np.innerHTML = `<i>♪</i> ${s.title} <small>${style === 'choir' ? '어린이 합창' : '오르골'}</small>`; np.classList.add('show'); }
+    };
+    startSong();
+    this.organTimer = setInterval(() => { if (c.state === 'running' && c.currentTime > this.songEnd + 7) startSong(); }, 1000);
   },
   bell(f = 196, amp = .5, when = 0) {
     if (!this.ctx) return; const c = this.ctx, t = c.currentTime + .02 + when;
