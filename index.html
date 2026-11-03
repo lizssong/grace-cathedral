@@ -257,6 +257,18 @@ table.mass tr.today td{color:#fbe7c4}
 .title .facade{width:min(280px,65vw);max-height:32dvh}.title .fine{font-size:10px}.title{padding:20px 12px 100px;overflow:auto}.wordmark{font-size:36px}
 }
 @media(max-height:500px) and (orientation:landscape){.title .facade{max-height:20dvh}.title{gap:4px;padding:8px 10px 58px}.wordmark{font-size:28px}.title .sub{font-size:11px}.title .fine{font-size:9px;bottom:5px}.caption{bottom:85px}.sheet{top:65px;max-height:calc(100dvh - 145px)}.status-chip{top:72px}.now-playing{display:none}}
+/* share */
+.pill button.share-btn{color:var(--gold);font-weight:500}
+.pill button.share-btn .share-txt{font-size:13px}
+#sheet-share{z-index:45;width:min(400px,calc(100vw - 28px))}
+#sheet-share .share-url{width:100%;box-sizing:border-box;margin:10px 0 2px;height:42px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--ink);font-size:13px;font-family:inherit}
+#sheet-share .btnrow>*{flex:1 1 140px}
+#sheet-share [hidden]{display:none!important}
+@media(max-width:380px){.pill button.share-btn .share-txt{display:none}#hud .pill button{min-width:40px;padding:0 4px}}
+#sheet-share .share-note{font-size:11.5px;color:var(--ink-faint);margin-top:12px}
+.title-share{margin-top:16px;height:40px;font-size:13.5px;color:var(--gold);border-color:rgba(231,181,106,.45);background:rgba(231,181,106,.06)}
+.title-share svg{width:17px;height:17px}
+@media(max-height:500px) and (orientation:landscape){.title-share{margin-top:6px;height:34px}}
 .title .maker-credit{display:block;margin-top:12px;color:#b8a58c;font-size:11px;letter-spacing:.12em;font-weight:500}
 @media(max-height:500px) and (orientation:landscape){.title .maker-credit{margin-top:4px;font-size:10px}}
 .appearance-option{display:flex;align-items:center;gap:9px;min-height:48px;margin-top:16px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;font-size:14px;cursor:pointer}.appearance-option input{width:20px;height:20px;accent-color:#e7b56a}.appearance-option small{color:var(--ink-dim)}.appearance-note{font-size:12px;line-height:1.7;color:var(--ink-dim)}
@@ -301,6 +313,7 @@ table.mass tr.today td{color:#fbe7c4}
   </button>
   <p class="enter-label" id="enter-label">성전을 준비하고 있어요</p>
   <div class="loading-dot" id="loading-dot"></div>
+  <button id="title-share" class="ghost title-share" aria-label="친구에게 공유하기"><svg viewBox="0 0 24 24" class="i"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M8.2 10.8l7.6-4.1M8.2 13.2l7.6 4.1"/></svg>친구에게 공유하기</button>
   <p class="boot-fail" id="boot-fail">이 창(미리보기)에서는 성당이 열리지 않아요.<br>크롬·엣지 같은 브라우저에서 파일을 직접 열거나, 웹 주소로 접속해 주세요.<br><small style="color:var(--ink-dim)">인터넷 연결이 필요해요.</small></p>
   <p class="fine">로마의 대성전들에서 영감을 받아 새로 지은 비공식 온라인 기도 공간입니다.<br>교황청·특정 성당과 관계가 없으며, 미사 참례를 대신하지 않아요.<span class="maker-credit">위드AI솔루션</span></p>
 </main>
@@ -318,6 +331,7 @@ table.mass tr.today td{color:#fbe7c4}
     <button id="btn-sound" aria-label="소리 켜기/끄기"><svg viewBox="0 0 24 24" class="i"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path id="snd-wave" d="M15.5 9.5a3.5 3.5 0 0 1 0 5M18 7a7 7 0 0 1 0 10"/><path id="snd-x" d="M16 10l4 4m0-4-4 4" style="display:none"/></svg></button>
     <button id="btn-settings" aria-label="설정"><svg viewBox="0 0 24 24" class="i"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
     <button id="btn-shot" aria-label="장면 담기"><svg viewBox="0 0 24 24" class="i"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
+    <button id="btn-share" class="share-btn" aria-label="친구에게 공유하기" title="친구에게 공유하기"><svg viewBox="0 0 24 24" class="i"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M8.2 10.8l7.6-4.1M8.2 13.2l7.6 4.1"/></svg><span class="share-txt">공유</span></button>
   </div>
 </header>
 
@@ -403,6 +417,17 @@ table.mass tr.today td{color:#fbe7c4}
     <a class="solid" id="shot-save" download="은총성당.png">이미지 저장</a>
     <button class="ghost" id="shot-link">초대 링크 복사</button>
   </div>
+</section>
+
+<section id="sheet-share" class="sheet center" aria-label="친구에게 공유하기">
+  <header><h2>친구에게 공유하기</h2><button class="close" data-close aria-label="닫기">✕</button></header>
+  <p id="share-desc">링크를 보내면 친구도 바로 은총 성당에 들어올 수 있어요.</p>
+  <input id="share-url" class="share-url" readonly aria-label="공유 링크">
+  <div class="btnrow">
+    <button class="solid" id="share-native">카카오톡·문자로 보내기</button>
+    <button class="ghost" id="share-copy">링크 복사</button>
+  </div>
+  <p class="share-note">같은 성전 링크로 들어오면 서로의 모습이 보이고 평화의 인사를 나눌 수 있어요.</p>
 </section>
 
 <!-- candle intention -->
@@ -1875,6 +1900,30 @@ $('#btn-shot').onclick = () => {
 };
 function showShot(url, title) { closeAll(); $('#shot-title').textContent = title; $('#shot-img').src = url; $('#shot-save').href = url; $('#sheet-shot').classList.add('open'); }
 $('#shot-link').onclick = async () => { const u = location.origin + location.pathname + '?room=' + roomNo; try { await navigator.clipboard.writeText(u); toast('초대 링크를 복사했어요. 같은 성전에서 만나요.'); } catch { prompt('링크를 복사해 주세요', u); } };
+/* share */
+const canNativeShare = !!navigator.share && matchMedia('(pointer:coarse)').matches;
+function shareUrlFor(withRoom) { return location.origin + location.pathname + (withRoom ? '?room=' + roomNo : ''); }
+function openShare(withRoom) {
+  const u = shareUrlFor(withRoom); $('#share-url').value = u;
+  $('#share-desc').textContent = withRoom ? `친구가 링크를 누르면 지금 계신 ${ROOM_NAMES[roomNo]}(성전 ${roomNo})으로 바로 와서 함께 머물 수 있어요.` : '링크를 보내면 친구도 바로 은총 성당에 들어올 수 있어요.';
+  $('#share-native').hidden = !canNativeShare; $('#share-copy').textContent = '링크 복사';
+  $('#share-copy').className = canNativeShare ? 'ghost' : 'solid';
+  closeAll(); $('#sheet-share').classList.add('open');
+}
+async function copyShare(u) {
+  let ok = false;
+  try { await navigator.clipboard.writeText(u); ok = true; } catch { const i = $('#share-url'); i.focus(); i.select(); try { ok = document.execCommand('copy'); } catch {} }
+  if (ok) { $('#share-copy').textContent = '복사했어요!'; toast('링크를 복사했어요. 카톡이나 문자에 붙여 넣어 보내 주세요.'); setTimeout(() => { $('#share-copy').textContent = '링크 복사'; }, 2200); }
+  else prompt('링크를 복사해 주세요', u);
+}
+$('#btn-share').onclick = () => openShare(true);
+$('#title-share').onclick = e => { e.stopPropagation(); openShare(params.has('room')); };
+$('#share-copy').onclick = () => copyShare($('#share-url').value);
+$('#share-native').onclick = async () => {
+  const u = $('#share-url').value;
+  try { await navigator.share({ title: '은총 성당 · 온라인 성당', text: '은총 성당에서 초 하나 밝히고 잠시 함께 쉬어 가요.', url: u }); }
+  catch (e) { if (!e || e.name !== 'AbortError') copyShare(u); }
+};
 $('#appearance-veil').onchange = e => {me.veil=e.target.checked;refreshMe();Net.lastStr='';toast(me.veil?'미사포를 착용했어요':'미사포를 벗었어요',1800);};
 $('#who-roll').onclick = () => { me.name = newName(); refreshMe(); Net.lastStr = ''; };
 { const sw = $('#swatches'); ROBES.forEach(c => { const b = document.createElement('button'); b.style.background = c; b.onclick = () => { me.robe = c; $$('#swatches button').forEach(x => x.classList.remove('on')); b.classList.add('on'); refreshMe(); }; if (c === me.robe) b.classList.add('on'); sw.append(b); }); }
