@@ -333,7 +333,7 @@ table.mass tr.today td{color:#fbe7c4}
   <div class="swatches" id="swatches"></div>
   <h3>성전</h3>
   <ul class="roomlist" id="roomlist"></ul>
-  <p style="font-size:11.5px;color:var(--ink-faint);margin-top:10px">같은 성전에 들어온 사람끼리 서로의 모습과 초, 평화의 인사를 실시간으로 나눠요. 표시되는 인원은 나와 직접 연결이 확인된 사람 수예요. 연결 대기 중에는 다른 방문자가 있어도 보이지 않을 수 있어요.</p>
+  <p style="font-size:11.5px;color:var(--ink-faint);margin-top:10px">같은 성전에 들어온 사람끼리 서로의 모습과 초, 평화의 인사를 실시간으로 나눠요. 표시되는 인원은 같은 성전 서버에 연결된 사람 수예요. 성전당 최대 30명이 함께할 수 있어요.</p>
 </section>
 
 <section id="sheet-people" class="sheet" aria-label="함께 있는 사람">
@@ -1515,47 +1515,54 @@ function speak(text) {
 }
 
 /* =========================================================
-   networking (WebRTC P2P via public relays)
+   networking (dedicated WebSocket room server)
    ========================================================= */
 const peers = new Map();
 const Net = {
-  selfId: crypto.randomUUID(), room:null, ok:false, sendState:null, sendEvt:null, lastSent:0, lastStr:'', generation:0, connecting:false, retries:0, timer:null, started:0, enabled:false, module:null,
-  async join(n) {
-    this.leave(); this.enabled=true; this.started=Date.now(); const gen=this.generation; this.connecting=true; setNet('wait');
-    if (!navigator.onLine) { this.connecting=false; setNet('off'); return; }
-    try {
-      const mod = this.module || await Promise.race([import('https://esm.sh/@trystero-p2p/nostr@0.26.0'), new Promise((_,reject)=>setTimeout(()=>reject(new Error('connect timeout')),20000))]);
-      if(gen!==this.generation || !this.enabled) return;
-      this.module=mod; this.selfId=mod.selfId;
-      const room=this.room=mod.joinRoom({appId:'grace-cathedral-ssongliz-v2'},'seongjeon-'+n);
-      const state=room.makeAction('st'), event=room.makeAction('ev');
-      const sS=(d,id)=>state.send(d,id?{target:id}:undefined), sE=(d,id)=>event.send(d,id?{target:id}:undefined);
-      this.sendState=sS; this.sendEvt=sE; this.connecting=false;
-      room.onPeerJoin=id=>{if(gen!==this.generation)return; sS(myState(),id); sE({k:'candles',list:candles.filter(c=>Date.now()-c.t<DAY).slice(-36)},id);};
-      room.onPeerLeave=id=>{if(gen!==this.generation)return; removePeer(id); this.sync();};
-      state.onMessage=(d,{peerId:id})=>{if(gen!==this.generation||!validState(d))return; if(!peers.has(id)&&peers.size>=24)return; upsertPeer(id,safeState(d)); const p=peers.get(id); if(p)p.seen=Date.now(); this.retries=0; this.sync();};
-      event.onMessage=(d,{peerId:id})=>{if(gen!==this.generation||!peers.has(id)||!d||typeof d!=='object')return; const p=peers.get(id); const now=Date.now(); if(now-(p.evtAt||0)<200)return; p.evtAt=now;
-        if(d.k==='candles'){if(Array.isArray(d.list))onEvent({k:'candles',list:d.list.slice(-36).filter(validCandle).map(safeCandle)},id);}
-        else if(d.k==='candle'&&validCandle(d.c))onEvent({k:'candle',c:safeCandle(d.c)},id);
-        else if(['peace','dove','rosary'].includes(d.k))onEvent({k:d.k,to:typeof d.to==='string'?d.to.slice(0,80):''},id);
+  selfId:crypto.randomUUID(), room:null, socket:null, ok:false, enabled:false, generation:0, retries:0, timer:null, retryTimer:null, connectTimer:null, lastSent:0, lastStr:'', lastHeard:0,
+  async join(n){
+    this.leave();this.enabled=true;const gen=this.generation;setNet('wait');
+    if(!navigator.onLine){setNet('off');return;}
+    try{
+      const ws=this.socket=this.room=new WebSocket('wss://grace-cathedral-live.mkssong22.workers.dev/room/'+n);
+      this.connectTimer=setTimeout(()=>{if(gen===this.generation&&!this.ok)ws.close();},15000);
+      ws.onmessage=e=>{
+        if(gen!==this.generation||!this.enabled||typeof e.data!=='string'||e.data.length>65536)return;
+        this.lastHeard=Date.now();let m;try{m=JSON.parse(e.data);}catch{return;}
+        if(m.k==='hello'&&typeof m.id==='string'){
+          clearTimeout(this.connectTimer);this.selfId=m.id;this.ok=true;this.retries=0;
+          for(const c of [...candles])removeCandle(c.id);
+          for(const c of (Array.isArray(m.candles)?m.candles:[]).slice(-36))if(validCandle(c))addCandle(safeCandle(c),true);
+          for(const p of (Array.isArray(m.peers)?m.peers:[]).slice(0,29))this.receiveState(p.id,p.d);
+          this.lastStr='';this.lastSent=0;this.send({k:'state',d:myState()});this.sync();
+          clearInterval(this.timer);this.timer=setInterval(()=>{if(!this.enabled)return;if(!document.hidden&&Date.now()-this.lastHeard>90000){this.socket?.close();return;}this.send({k:'ping'});},10000);
+        }else if(m.k==='state')this.receiveState(m.id,m.d);
+        else if(m.k==='bye'&&typeof m.id==='string'){removePeer(m.id);this.sync();}
+        else if(m.k==='event'&&typeof m.id==='string'&&m.d&&typeof m.d==='object'){
+          const d=m.d;
+          if(d.k==='candle'&&validCandle(d.c))onEvent({k:'candle',c:safeCandle(d.c)},m.id);
+          else if(['peace','dove','rosary'].includes(d.k))onEvent({k:d.k,to:typeof d.to==='string'?d.to.slice(0,100):''},m.id);
+        }
       };
-      this.sync(); this.timer=setInterval(()=>this.maintain(),5000);
-    } catch(e) { if(gen!==this.generation)return; this.connecting=false; this.ok=false; setNet('off'); this.schedule(); }
+      ws.onclose=()=>{if(gen!==this.generation)return;clearTimeout(this.connectTimer);clearInterval(this.timer);this.ok=false;this.room=null;this.socket=null;for(const id of [...peers.keys()])removePeer(id);this.sync();this.schedule();};
+      ws.onerror=()=>{if(gen===this.generation)setNet('off');};
+    }catch{this.ok=false;setNet('off');this.schedule();}
   },
-  sync(){this.ok=peers.size>0; setNet(this.ok?'on':navigator.onLine?'wait':'off'); updateCount();},
-  schedule(){if(this.retryTimer)return;if(!this.enabled||document.hidden||!navigator.onLine)return; const delay=Math.min(60000,5000*Math.pow(2,Math.min(this.retries++,4))); this.retryTimer=setTimeout(()=>{this.retryTimer=null;if(this.enabled)this.join(roomNo);},delay+Math.random()*1000);},
-  maintain(){if(!this.enabled)return; for(const [id,p] of peers)if(Date.now()-(p.seen||0)>35000)removePeer(id);this.sync(); if(!document.hidden)this.tick(performance.now());if(!peers.size&&Date.now()-this.started>45000){this.started=Date.now();this.schedule();}},
-  leave(){this.generation++;this.enabled=false;this.connecting=false;this.ok=false;clearInterval(this.timer);clearTimeout(this.retryTimer);this.retryTimer=null;try{this.room?.leave();}catch{} this.room=null;this.sendState=this.sendEvt=null;this.lastSent=0;this.lastStr='';for(const id of [...peers.keys()])removePeer(id);updateCount();},
-  evt(d){try{if(this.sendEvt&&this.ok)this.sendEvt(d);else toast('아직 다른 방문자와 연결되지 않았어요. 내 화면에서만 진행됩니다.',4200);}catch{}},
-  tick(now){if(!this.sendState)return;const s=myState(),str=JSON.stringify(s);if((str!==this.lastStr&&now-this.lastSent>200)||now-this.lastSent>2500){try{this.sendState(s);}catch{} this.lastSent=now;this.lastStr=str;}}
+  receiveState(id,d){if(typeof id!=='string'||id===this.selfId||id.length>100||!validState(d))return;if(!peers.has(id)&&peers.size>=29)return;const before=peers.get(id)?.name;upsertPeer(id,safeState(d));if(before!==d.n)this.sync();},
+  sync(){setNet(this.ok?'on':navigator.onLine?'wait':'off');updateCount();},
+  send(m){try{if(this.socket?.readyState===WebSocket.OPEN&&this.socket.bufferedAmount<32768)this.socket.send(JSON.stringify(m));}catch{}},
+  schedule(){clearTimeout(this.retryTimer);if(!this.enabled||!navigator.onLine||document.hidden)return;const delay=Math.min(30000,1500*Math.pow(2,Math.min(this.retries++,5)));this.retryTimer=setTimeout(()=>{if(this.enabled)this.join(roomNo);},delay+Math.random()*600);},
+  leave(){this.generation++;this.enabled=false;this.ok=false;clearInterval(this.timer);clearTimeout(this.connectTimer);clearTimeout(this.retryTimer);const ws=this.socket;this.socket=this.room=null;try{ws?.close(1000,'leaving');}catch{}this.lastSent=0;this.lastStr='';for(const id of [...peers.keys()])removePeer(id);updateCount();},
+  evt(d){if(this.ok)this.send({k:'event',d});else toast('현재 연결이 끊겨 내 화면에서만 진행됩니다. 연결 후 다시 시도해 주세요.',4500);},
+  tick(now){if(!this.ok)return;const s=myState(),str=JSON.stringify(s);if((str!==this.lastStr&&now-this.lastSent>350)||now-this.lastSent>15000){this.send({k:'state',d:s});this.lastSent=now;this.lastStr=str;}}
 };
 const cleanText=(x,n=32)=>String(x??'').replace(/[<>&"']/g,'').slice(0,n);
 function validState(d){return d&&typeof d==='object'&&Number.isFinite(d.x)&&Number.isFinite(d.z)&&Number.isFinite(d.y)&&Math.abs(d.x)<100&&Math.abs(d.z)<100&&typeof d.n==='string';}
-function safeState(d){return {n:cleanText(d.n),no:cleanText(d.no,8),c:/^#[0-9a-f]{6}$/i.test(d.c)?d.c:'#555555',v:d.v?1:0,x:d.x,z:d.z,y:d.y,s:['idle','sit','kneel','sitpray','pray','carry','bow','water','peace'].includes(d.s)?d.s:'idle',m:d.m?1:0,cd:d.cd?1:0,ap:Number.isFinite(d.ap)?clamp(d.ap,0,1):0};}
+function safeState(d){return {n:cleanText(d.n),no:cleanText(d.no,8),c:/^#[0-9a-f]{6}$/i.test(d.c)?d.c:'#555555',v:d.v?1:0,x:d.x,z:d.z,y:d.y,s:['idle','sit','kneel','sitpray','pray','carry','bow','cross','water','peace'].includes(d.s)?d.s:'idle',m:d.m?1:0,cd:d.cd?1:0,ap:Number.isFinite(d.ap)?clamp(d.ap,0,1):0};}
 function validCandle(c){return c&&typeof c.id==='string'&&c.id.length<100&&Number.isFinite(c.t)&&c.t<=Date.now()+60000&&c.t>Date.now()-DAY&&Number.isInteger(c.w)&&c.w>=1&&c.w<=4;}
 function safeCandle(c){return {id:cleanText(c.id,100),t:c.t,w:c.w,name:cleanText(c.name),slot:null};}
 function myState() { return { n: me.name, no: me.no, c: me.robe, v: me.veil ? 1 : 0, x: +player.pos.x.toFixed(2), z: +player.pos.z.toFixed(2), y: +player.yaw.toFixed(2), s: player.state, m: player.moving ? 1 : 0, cd: meAv.userData.candle.visible ? 1 : 0, ap: player.anim ? +(player.anim.t / player.anim.dur).toFixed(2) : 0 }; }
-function setNet(s){const d=$('#netdot');d.className='netdot '+(s==='on'?'on':s==='wait'?'wait':''); const text=s==='on'?`성전 ${roomNo} · ${peers.size+1}명 연결 확인`:s==='wait'?`성전 ${roomNo} · 함께할 사람 연결 대기 · 재시도`:'인터넷·공유망 연결 확인 · 재시도'; $('#status-chip').textContent=text; $('#status-chip').setAttribute('aria-label',text);}
+function setNet(s){const d=$('#netdot');d.className='netdot '+(s==='on'?'on':s==='wait'?'wait':'');const text=s==='on'?`성전 ${roomNo} · ${peers.size+1}명 함께 · 서버 연결됨`:s==='wait'?`성전 ${roomNo} · 서버에 연결 중 · 재시도`:'연결이 끊겼어요 · 자동 재연결 중';$('#status-chip').textContent=text;$('#status-chip').setAttribute('aria-label',text);}
 function upsertPeer(id, d) {
   let p = peers.get(id);
   if (!p) {
@@ -1998,7 +2005,7 @@ $('#status-chip').onclick=()=>{if(entered&&running){Net.join(roomNo);toast('다�
 addEventListener('offline',()=>{if(!entered||!running)return;Net.leave();setNet('off');});
 addEventListener('online',()=>{if(entered&&running)Net.join(roomNo);});
 let hiddenAt=0;
-document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();}else if(entered&&running){if(!Net.room||Date.now()-hiddenAt>10000)Net.join(roomNo);else Net.tick(performance.now());}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();}else if(entered&&running){if(!Net.room||!Net.ok||Net.socket?.readyState!==WebSocket.OPEN)Net.join(roomNo);else{Net.lastHeard=Date.now();Net.send({k:'ping'});Net.lastSent=0;Net.tick(performance.now());}}});
 addEventListener('pagehide',()=>Net.leave());
 addEventListener('pageshow',e=>{if(e.persisted&&entered&&running)Net.join(roomNo);});
 $('#enter').onclick = () => {
