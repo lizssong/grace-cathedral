@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#120d0a">
 <meta name="color-scheme" content="dark">
-<title>바티칸 성당 · 온라인 성당</title>
+<title>은총 성당 · 온라인 성당</title>
 <meta name="description" content="황금빛 궁륭과 쿠폴라의 빛, 피에타 앞의 봉헌초. 성 베드로 대성전에서 영감을 받은, 말없이 함께 머무는 온라인 성당.">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="바티칸 성당">
-<meta property="og:title" content="바티칸 성당 · 온라인 성당">
+<meta property="og:site_name" content="은총 성당">
+<meta property="og:title" content="은총 성당 · 온라인 성당">
 <meta property="og:description" content="초를 봉헌하고, 묵주기도를 바치고, 말없이 함께 머무는 온라인 성당.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23140e0a'/%3E%3Cpath d='M16 5v22M10 11h12' stroke='%23e7b56a' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -233,10 +233,10 @@ table.mass tr.today td{color:#fbe7c4}
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 </head>
 <body>
-<canvas id="c" tabindex="0" aria-label="바티칸 성당 3D 공간. 황금 궁륭, 쿠폴라, 꼬인 청동 기둥의 제대, 피에타 경당이 있는 성전을 3인칭으로 둘러봅니다."></canvas>
+<canvas id="c" tabindex="0" aria-label="은총 성당 3D 공간. 황금 궁륭, 쿠폴라, 꼬인 청동 기둥의 제대, 피에타 경당이 있는 성전을 3인칭으로 둘러봅니다."></canvas>
 
 <!-- ============ TITLE ============ -->
-<main id="title" class="title" aria-label="바티칸 성당 입장">
+<main id="title" class="title" aria-label="은총 성당 입장">
   <svg class="facade" viewBox="0 0 360 250" aria-hidden="true">
     <defs>
       <linearGradient id="stone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9dcc0"/><stop offset="1" stop-color="#b9a47e"/></linearGradient>
@@ -262,7 +262,7 @@ table.mass tr.today td{color:#fbe7c4}
     <g fill="#efe3c8"><rect x="28" y="222" width="3" height="10"/><rect x="329" y="222" width="3" height="10"/><rect x="39" y="220.8" width="3" height="11.2"/><rect x="318" y="220.8" width="3" height="11.2"/><rect x="50" y="219.6" width="3" height="12.4"/><rect x="307" y="219.6" width="3" height="12.4"/><rect x="61" y="218.4" width="3" height="13.6"/><rect x="296" y="218.4" width="3" height="13.6"/><rect x="72" y="217.2" width="3" height="14.8"/><rect x="285" y="217.2" width="3" height="14.8"/><rect x="83" y="216" width="3" height="16"/><rect x="274" y="216" width="3" height="16"/></g>
     <rect x="0" y="232" width="360" height="3" fill="#3b2418"/>
   </svg>
-  <h1 class="wordmark">바티칸 성당</h1>
+  <h1 class="wordmark">은총 성당</h1>
   <p class="place">ONLINE · BASILICA</p>
   <p class="motto">십자고상 아래 말없이 함께 머무는 곳<br>성모님과 피에타 앞에 초 하나 밝히고, 잠시 쉬어 가세요</p>
   <button id="enter" class="enter" aria-label="성당에 들어가기" disabled>
@@ -278,7 +278,7 @@ table.mass tr.today td{color:#fbe7c4}
 <header class="hud" id="hud" hidden>
   <div class="left-group">
     <div class="pill icon-only"><button id="btn-exit" aria-label="성당 나가기" title="나가기"><svg viewBox="0 0 24 24" class="i"><path d="M10 4H5v16h5"/><path d="M14 8l4 4-4 4M18 12H9"/></svg></button></div>
-    <div class="pill brand"><button id="btn-room" aria-label="성전 선택"><svg viewBox="0 0 24 24" class="i" style="color:var(--gold)"><path d="M12 2.5v4M10.3 4.2h3.4"/><path d="M5 21V11l7-4.5 7 4.5v10"/><path d="M10 21v-4a2 2 0 0 1 4 0v4"/><path d="M3 21h18"/></svg><b>바티칸 성당</b><span class="room" id="room-label">성전 1</span><span class="netdot wait" id="netdot"></span></button></div>
+    <div class="pill brand"><button id="btn-room" aria-label="성전 선택"><svg viewBox="0 0 24 24" class="i" style="color:var(--gold)"><path d="M12 2.5v4M10.3 4.2h3.4"/><path d="M5 21V11l7-4.5 7 4.5v10"/><path d="M10 21v-4a2 2 0 0 1 4 0v4"/><path d="M3 21h18"/></svg><b>은총 성당</b><span class="room" id="room-label">성전 1</span><span class="netdot wait" id="netdot"></span></button></div>
   </div>
   <div class="pill">
     <button id="btn-people" aria-label="함께 있는 사람"><svg viewBox="0 0 24 24" class="i"><path d="M12 3.5c1.2 1.5 1.5 2.6 1 3.5-.3.5-1 .8-1 .8s-.7-.3-1-.8c-.5-.9-.2-2 1-3.5Z" fill="currentColor" stroke="none"/><path d="M10.6 10h2.8v10h-2.8z"/></svg><span id="count">1</span></button>
@@ -368,7 +368,7 @@ table.mass tr.today td{color:#fbe7c4}
   <header><h2 id="shot-title">장면 담기</h2><button class="close" data-close aria-label="닫기">✕</button></header>
   <img id="shot-img" alt="성당에서 담은 장면">
   <div class="btnrow">
-    <a class="solid" id="shot-save" download="바티칸성당.png">이미지 저장</a>
+    <a class="solid" id="shot-save" download="은총성당.png">이미지 저장</a>
     <button class="ghost" id="shot-link">초대 링크 복사</button>
   </div>
 </section>
@@ -413,7 +413,7 @@ table.mass tr.today td{color:#fbe7c4}
 
 <!-- end -->
 <section id="endcard" class="endcard">
-  <small>바티칸 성당</small>
+  <small>은총 성당</small>
   <h1>평화를 빕니다</h1>
   <p>초는 하루 동안 이 성당에서 타올라요.<br>다시 쉬고 싶을 때 언제든 들러 주세요.</p>
   <div class="btnrow"><button class="solid" onclick="location.reload()">다시 머무르기</button></div>
@@ -1740,7 +1740,7 @@ $('#rv-keep').onclick = () => {
     g.drawImage(rvc, 0, 0, rvc.width, rvc.height * .78, w * .05, 120, w * .9, w * .9 * (rvc.height * .78) / rvc.width);
     g.textAlign = 'center'; g.fillStyle = '#e7b56a'; g.font = '500 28px "Noto Sans KR",sans-serif'; g.fillText(todayKey().replace(/-/g, '. ') + ' · ' + RV.myst, w / 2, h - 260);
     g.fillStyle = '#fbefd9'; g.font = '600 54px "Noto Serif KR",serif'; g.fillText(`오늘 성모송 ${st.hail}번을 바쳤어요`, w / 2, h - 180);
-    g.fillStyle = 'rgba(245,234,214,.6)'; g.font = '400 30px "Noto Serif KR",serif'; g.fillText('바티칸 성당 · 온라인 성당', w / 2, h - 110);
+    g.fillStyle = 'rgba(245,234,214,.6)'; g.font = '400 30px "Noto Serif KR",serif'; g.fillText('은총 성당 · 온라인 성당', w / 2, h - 110);
   });
   showShot(c.toDataURL('image/png'), '묵주기도 기념 이미지');
 };
@@ -1803,7 +1803,7 @@ $('#btn-shot').onclick = () => {
   renderer.render(scene, camera);
   const src = renderer.domElement; const c = makeCanvas(src.width, src.height, (g, w, h) => {
     g.drawImage(src, 0, 0); const s = w / 1400; g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(0, h - 70 * s, w, 70 * s);
-    g.fillStyle = '#fbefd9'; g.font = `600 ${26 * s}px "Noto Serif KR",serif`; g.textAlign = 'left'; g.fillText('바티칸 성당', 28 * s, h - 26 * s);
+    g.fillStyle = '#fbefd9'; g.font = `600 ${26 * s}px "Noto Serif KR",serif`; g.textAlign = 'left'; g.fillText('은총 성당', 28 * s, h - 26 * s);
     g.fillStyle = 'rgba(245,234,214,.7)'; g.font = `400 ${18 * s}px "Noto Sans KR",sans-serif`; g.textAlign = 'right'; g.fillText(`${ROOM_NAMES[roomNo]} · ${todayKey().replace(/-/g, '. ')}`, w - 28 * s, h - 28 * s);
   });
   showShot(c.toDataURL('image/png'), '장면 담기');
@@ -1962,7 +1962,7 @@ $('#enter').onclick = () => {
   Sound.init(); setTimeout(() => Sound.toll(1, 0, 174), 600);
   cam.yaw = 0; camera.position.set(0, 3.4, 23);
   const hint = $('#hint'); hint.textContent = isTouch ? '바닥을 눌러 이동 · 쓸어서 둘러보기 · 두 손가락으로 확대' : '바닥 클릭 · WASD로 이동 · 드래그로 둘러보기 · 휠로 확대'; hint.classList.add('show'); setTimeout(() => hint.classList.remove('show'), 6500);
-  setTimeout(() => caption('바티칸 성당', '십자고상 아래, 말없이 함께 머물러요.<br>장의자에 앉거나 성모님 제대, 오른편 피에타 경당에 초를 밝혀 보세요.', 6500), 1400);
+  setTimeout(() => caption('은총 성당', '십자고상 아래, 말없이 함께 머물러요.<br>장의자에 앉거나 성모님 제대, 오른편 피에타 경당에 초를 밝혀 보세요.', 6500), 1400);
 };
 window.__lux = { scene, player, peers, Net, act, walkTo, applySky, handleClick, pickTest: (cx, cy) => { ndc.set(cx / innerWidth * 2 - 1, -(cy / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera); return ray.intersectObjects([...pickables, ...world.children.filter(o => o.userData.floor)], true).slice(0, 4).map(h => { let o = h.object, pk = null; while (o && !pk) { pk = o.userData.pick; o = o.parent; } return { d: +h.distance.toFixed(2), pk: pk && pk.action, floor: !!h.object.userData.floor }; }); }, candles: () => candles, project: (x, y, z) => { const v = new THREE.Vector3(x, y, z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; } };
 </script>
