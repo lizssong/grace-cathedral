@@ -244,6 +244,8 @@ table.mass tr.today td{color:#fbe7c4}
 .title .facade{width:min(280px,65vw);max-height:32dvh}.title .fine{font-size:10px}.title{padding:20px 12px 100px;overflow:auto}.wordmark{font-size:36px}
 }
 @media(max-height:500px) and (orientation:landscape){.title .facade{max-height:20dvh}.title{gap:4px;padding:8px 10px 58px}.wordmark{font-size:28px}.title .sub{font-size:11px}.title .fine{font-size:9px;bottom:5px}.caption{bottom:85px}.sheet{top:65px;max-height:calc(100dvh - 145px)}.status-chip{top:72px}.now-playing{display:none}}
+.title .maker-credit{display:block;margin-top:12px;color:#b8a58c;font-size:11px;letter-spacing:.12em;font-weight:500}
+@media(max-height:500px) and (orientation:landscape){.title .maker-credit{margin-top:4px;font-size:10px}}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 </head>
@@ -286,7 +288,7 @@ table.mass tr.today td{color:#fbe7c4}
   <p class="enter-label" id="enter-label">성전을 준비하고 있어요</p>
   <div class="loading-dot" id="loading-dot"></div>
   <p class="boot-fail" id="boot-fail">이 창(미리보기)에서는 성당이 열리지 않아요.<br>크롬·엣지 같은 브라우저에서 파일을 직접 열거나, 웹 주소로 접속해 주세요.<br><small style="color:var(--ink-dim)">인터넷 연결이 필요해요.</small></p>
-  <p class="fine">로마의 대성전들에서 영감을 받아 새로 지은 비공식 온라인 기도 공간입니다.<br>교황청·특정 성당과 관계가 없으며, 미사 참례를 대신하지 않아요.</p>
+  <p class="fine">로마의 대성전들에서 영감을 받아 새로 지은 비공식 온라인 기도 공간입니다.<br>교황청·특정 성당과 관계가 없으며, 미사 참례를 대신하지 않아요.<span class="maker-credit">위드AI솔루션</span></p>
 </main>
 
 <!-- ============ HUD ============ -->
