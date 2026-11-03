@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#120d0a">
 <meta name="color-scheme" content="dark">
 <title>은총 성당 · 온라인 성당</title>
@@ -229,6 +229,21 @@ table.mass tr.today td{color:#fbe7c4}
   .hud{left:10px;right:10px}.left-group{gap:6px}.pill{height:42px;padding:0 3px}.pill button{min-width:32px;padding:0 6px;height:34px}.icon-only{width:42px}
   .actions{gap:0;padding:4px}.actions button{min-width:56px;padding:7px 4px 5px;font-size:10.5px}.actions button svg{width:21px;height:21px}
   .sheet{right:10px;width:calc(100vw - 20px)}.sheet.left{left:10px}}
+
+/* Mobile stability revision 2026-11-03 */
+#status-chip{cursor:pointer;color:#f5ead6;border:1px solid var(--line);min-height:36px;touch-action:manipulation}
+#status-chip:focus-visible{outline:2px solid var(--gold)}
+@media(max-width:720px){
+.hud{flex-wrap:wrap;gap:6px;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right))}.hud .pill button{min-width:44px;height:44px}.hud .pill{height:48px}.hud .icon-only{min-width:44px;height:48px}.hud .brand b{display:inline;font-size:12px}.hud .brand .room{display:none}.hud .right-group{margin-left:auto}
+.actions{width:calc(100% - 16px);max-width:480px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));bottom:max(8px,env(safe-area-inset-bottom));padding:4px;border-radius:22px;overflow:visible}.actions button{min-width:0;min-height:58px;padding:7px 1px;font-size:10px}.actions span{white-space:normal;line-height:1.3}.actions kbd{display:none}
+.status-chip{display:block;top:calc(max(14px,env(safe-area-inset-top)) + 108px);bottom:auto;right:10px;max-width:calc(100vw - 20px);font-size:11px;padding:8px 10px;background:rgba(20,14,10,.88)}
+.now-playing{top:calc(max(14px,env(safe-area-inset-top)) + 78px);left:10px;font-size:10px;max-width:calc(100vw - 20px)}
+.sheet{top:calc(max(14px,env(safe-area-inset-top)) + 150px);max-height:calc(100dvh - 250px);overscroll-behavior:contain}.sheet button{min-height:44px}.sheet input{font-size:16px}
+.stick{left:max(16px,env(safe-area-inset-left));bottom:calc(max(8px,env(safe-area-inset-bottom)) + 84px);width:100px;height:100px}.stick.ready{display:block}
+.caption{bottom:calc(max(8px,env(safe-area-inset-bottom)) + 190px);font-size:13px;padding:8px 12px;line-height:1.7}.hint{white-space:normal;width:90vw;text-align:center;justify-content:center;font-size:12px}
+.title .facade{width:min(280px,65vw);max-height:32dvh}.title .fine{font-size:10px}.title{padding:20px 12px 100px;overflow:auto}.wordmark{font-size:36px}
+}
+@media(max-height:500px) and (orientation:landscape){.title .facade{max-height:20dvh}.title{gap:4px;padding:8px 10px 58px}.wordmark{font-size:28px}.title .sub{font-size:11px}.title .fine{font-size:9px;bottom:5px}.caption{bottom:85px}.sheet{top:65px;max-height:calc(100dvh - 145px)}.status-chip{top:72px}.now-playing{display:none}}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 </head>
@@ -295,7 +310,7 @@ table.mass tr.today td{color:#fbe7c4}
 <div id="tags"></div>
 <div id="hint" class="hint"></div>
 <div id="stick" class="stick" aria-hidden="true"><i></i></div>
-<div id="status-chip" class="status-chip"></div>
+<button id="status-chip" class="status-chip" aria-label="연결 상태 확인 및 재연결" title="눌러서 다시 연결"></button>
 <div id="now-playing" class="now-playing" aria-live="off"></div>
 
 <!-- ============ ACTIONS ============ -->
@@ -316,7 +331,7 @@ table.mass tr.today td{color:#fbe7c4}
   <div class="swatches" id="swatches"></div>
   <h3>성전</h3>
   <ul class="roomlist" id="roomlist"></ul>
-  <p style="font-size:11.5px;color:var(--ink-faint);margin-top:10px">같은 성전에 들어온 사람끼리 서로의 모습과 초, 평화의 인사를 실시간으로 나눠요. 표시되는 인원은 실제 접속자 수예요.</p>
+  <p style="font-size:11.5px;color:var(--ink-faint);margin-top:10px">같은 성전에 들어온 사람끼리 서로의 모습과 초, 평화의 인사를 실시간으로 나눠요. 표시되는 인원은 나와 직접 연결이 확인된 사람 수예요. 연결 대기 중에는 다른 방문자가 있어도 보이지 않을 수 있어요.</p>
 </section>
 
 <section id="sheet-people" class="sheet" aria-label="함께 있는 사람">
@@ -437,7 +452,8 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem('lux:' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem('lux:' + k, JSON.stringify(v)); } catch {} }
 };
-const isTouch = matchMedia('(pointer:coarse)').matches;
+const isTouch = matchMedia('(pointer:coarse)').matches || navigator.maxTouchPoints > 0;
+const isMobile = isTouch || innerWidth <= 720;
 const seoulNow = () => { const d = new Date(); const s = new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Seoul' })); return s; };
 
 function toast(msg, ms = 3400, cls = '') {
@@ -469,13 +485,14 @@ const ROOM_NAMES = ['', '베드로 성전', '피에타 경당', '로사리오 �
    settings
    ========================================================= */
 const settings = Object.assign({ master: .7, organ: .35, ambient: .5, sfx: .7, bg: false, speak: false, lite: isTouch, muted: false }, store.get('settings', {}));
+if (isMobile) settings.lite = true;
 const saveSettings = () => store.set('settings', settings);
 
 /* =========================================================
    renderer / scene
    ========================================================= */
 const canvas = $('#c');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: !isMobile, preserveDrawingBuffer: false, powerPreference: isMobile ? 'low-power' : 'high-performance' });
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
@@ -1500,32 +1517,43 @@ function speak(text) {
    ========================================================= */
 const peers = new Map();
 const Net = {
-  selfId: Math.random().toString(36).slice(2, 10), room: null, ok: false, sendState: null, sendEvt: null, lastSent: 0, lastStr: '',
+  selfId: crypto.randomUUID(), room:null, ok:false, sendState:null, sendEvt:null, lastSent:0, lastStr:'', generation:0, connecting:false, retries:0, timer:null, started:0, enabled:false, module:null,
   async join(n) {
-    setNet('wait');
+    this.leave(); this.enabled=true; this.started=Date.now(); const gen=this.generation; this.connecting=true; setNet('wait');
+    if (!navigator.onLine) { this.connecting=false; setNet('off'); return; }
     try {
-      const load = () => Promise.race([import('https://esm.sh/trystero@0.21.4/nostr'), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 30000))]);
-      let mod; try { mod = await load(); } catch { await new Promise(r => setTimeout(r, 3000)); mod = await load(); }
-      this.selfId = mod.selfId; this.ok = true;
-      const room = this.room = mod.joinRoom({ appId: 'vatican-online-ssongliz-2026' }, 'seongjeon-' + n);
-      const [sS, gS] = room.makeAction('st'); const [sE, gE] = room.makeAction('ev');
-      this.sendState = sS; this.sendEvt = sE;
-      room.onPeerJoin(id => { sS(myState(), id); sE({ k: 'candles', list: candles.filter(c => Date.now() - c.t < DAY).slice(-36) }, id); updateCount(); });
-      room.onPeerLeave(id => { const p = peers.get(id); if (p) toast(`${p.name}님이 성당을 나섰어요`); removePeer(id); updateCount(); });
-      gS((d, id) => upsertPeer(id, d));
-      gE((d, id) => onEvent(d, id));
-      setNet('on'); updateCount();
-    } catch (e) { console.warn('P2P unavailable', e); this.ok = false; setNet('off'); }
+      const mod = this.module || await Promise.race([import('https://esm.sh/@trystero-p2p/nostr@0.26.0'), new Promise((_,reject)=>setTimeout(()=>reject(new Error('connect timeout')),20000))]);
+      if(gen!==this.generation || !this.enabled) return;
+      this.module=mod; this.selfId=mod.selfId;
+      const room=this.room=mod.joinRoom({appId:'grace-cathedral-ssongliz-v2'},'seongjeon-'+n);
+      const state=room.makeAction('st'), event=room.makeAction('ev');
+      const sS=(d,id)=>state.send(d,id?{target:id}:undefined), sE=(d,id)=>event.send(d,id?{target:id}:undefined);
+      this.sendState=sS; this.sendEvt=sE; this.connecting=false;
+      room.onPeerJoin=id=>{if(gen!==this.generation)return; sS(myState(),id); sE({k:'candles',list:candles.filter(c=>Date.now()-c.t<DAY).slice(-36)},id);};
+      room.onPeerLeave=id=>{if(gen!==this.generation)return; removePeer(id); this.sync();};
+      state.onMessage=(d,{peerId:id})=>{if(gen!==this.generation||!validState(d))return; if(!peers.has(id)&&peers.size>=24)return; upsertPeer(id,safeState(d)); const p=peers.get(id); if(p)p.seen=Date.now(); this.retries=0; this.sync();};
+      event.onMessage=(d,{peerId:id})=>{if(gen!==this.generation||!peers.has(id)||!d||typeof d!=='object')return; const p=peers.get(id); const now=Date.now(); if(now-(p.evtAt||0)<200)return; p.evtAt=now;
+        if(d.k==='candles'){if(Array.isArray(d.list))onEvent({k:'candles',list:d.list.slice(-36).filter(validCandle).map(safeCandle)},id);}
+        else if(d.k==='candle'&&validCandle(d.c))onEvent({k:'candle',c:safeCandle(d.c)},id);
+        else if(['peace','dove','rosary'].includes(d.k))onEvent({k:d.k,to:typeof d.to==='string'?d.to.slice(0,80):''},id);
+      };
+      this.sync(); this.timer=setInterval(()=>this.maintain(),5000);
+    } catch(e) { if(gen!==this.generation)return; this.connecting=false; this.ok=false; setNet('off'); this.schedule(); }
   },
-  leave() { try { this.room?.leave(); } catch {} this.room = null; this.sendState = this.sendEvt = null; for (const id of [...peers.keys()]) removePeer(id); updateCount(); },
-  evt(d) { try { this.sendEvt && this.sendEvt(d); } catch {} },
-  tick(now) {
-    if (!this.sendState) return; const s = myState(); const str = JSON.stringify(s);
-    if ((str !== this.lastStr && now - this.lastSent > 150) || now - this.lastSent > 2500) { try { this.sendState(s); } catch {} this.lastSent = now; this.lastStr = str; }
-  }
+  sync(){this.ok=peers.size>0; setNet(this.ok?'on':navigator.onLine?'wait':'off'); updateCount();},
+  schedule(){if(this.retryTimer)return;if(!this.enabled||document.hidden||!navigator.onLine)return; const delay=Math.min(60000,5000*Math.pow(2,Math.min(this.retries++,4))); this.retryTimer=setTimeout(()=>{this.retryTimer=null;if(this.enabled)this.join(roomNo);},delay+Math.random()*1000);},
+  maintain(){if(!this.enabled)return; for(const [id,p] of peers)if(Date.now()-(p.seen||0)>35000)removePeer(id);this.sync(); if(!document.hidden)this.tick(performance.now());if(!peers.size&&Date.now()-this.started>45000){this.started=Date.now();this.schedule();}},
+  leave(){this.generation++;this.enabled=false;this.connecting=false;this.ok=false;clearInterval(this.timer);clearTimeout(this.retryTimer);this.retryTimer=null;try{this.room?.leave();}catch{} this.room=null;this.sendState=this.sendEvt=null;this.lastSent=0;this.lastStr='';for(const id of [...peers.keys()])removePeer(id);updateCount();},
+  evt(d){try{if(this.sendEvt&&this.ok)this.sendEvt(d);else toast('아직 다른 방문자와 연결되지 않았어요. 내 화면에서만 진행됩니다.',4200);}catch{}},
+  tick(now){if(!this.sendState)return;const s=myState(),str=JSON.stringify(s);if((str!==this.lastStr&&now-this.lastSent>200)||now-this.lastSent>2500){try{this.sendState(s);}catch{} this.lastSent=now;this.lastStr=str;}}
 };
+const cleanText=(x,n=32)=>String(x??'').replace(/[<>&"']/g,'').slice(0,n);
+function validState(d){return d&&typeof d==='object'&&Number.isFinite(d.x)&&Number.isFinite(d.z)&&Number.isFinite(d.y)&&Math.abs(d.x)<100&&Math.abs(d.z)<100&&typeof d.n==='string';}
+function safeState(d){return {n:cleanText(d.n),no:cleanText(d.no,8),c:/^#[0-9a-f]{6}$/i.test(d.c)?d.c:'#555555',v:d.v?1:0,x:d.x,z:d.z,y:d.y,s:['idle','sit','kneel','sitpray','pray','carry','bow','water','peace'].includes(d.s)?d.s:'idle',m:d.m?1:0,cd:d.cd?1:0,ap:Number.isFinite(d.ap)?clamp(d.ap,0,1):0};}
+function validCandle(c){return c&&typeof c.id==='string'&&c.id.length<100&&Number.isFinite(c.t)&&c.t<=Date.now()+60000&&c.t>Date.now()-DAY&&Number.isInteger(c.w)&&c.w>=1&&c.w<=4;}
+function safeCandle(c){return {id:cleanText(c.id,100),t:c.t,w:c.w,name:cleanText(c.name),slot:null};}
 function myState() { return { n: me.name, no: me.no, c: me.robe, v: me.veil ? 1 : 0, x: +player.pos.x.toFixed(2), z: +player.pos.z.toFixed(2), y: +player.yaw.toFixed(2), s: player.state, m: player.moving ? 1 : 0, cd: meAv.userData.candle.visible ? 1 : 0, ap: player.anim ? +(player.anim.t / player.anim.dur).toFixed(2) : 0 }; }
-function setNet(s) { const d = $('#netdot'); d.className = 'netdot ' + (s === 'on' ? 'on' : s === 'wait' ? 'wait' : ''); $('#status-chip').textContent = s === 'on' ? `성전 ${roomNo} · 실시간 연결됨` : s === 'wait' ? '성전에 연결하는 중…' : '혼자 머무는 중 (연결 안 됨)'; }
+function setNet(s){const d=$('#netdot');d.className='netdot '+(s==='on'?'on':s==='wait'?'wait':''); const text=s==='on'?`성전 ${roomNo} · ${peers.size+1}명 연결 확인`:s==='wait'?`성전 ${roomNo} · 함께할 사람 연결 대기 · 재시도`:'인터넷·공유망 연결 확인 · 재시도'; $('#status-chip').textContent=text; $('#status-chip').setAttribute('aria-label',text);}
 function upsertPeer(id, d) {
   let p = peers.get(id);
   if (!p) {
@@ -1778,7 +1806,9 @@ const stick = $('#stick'); let stickV = null;
 stick.addEventListener('pointerdown', e => { stick.setPointerCapture(e.pointerId); stickV = { x: 0, y: 0 }; moveStick(e); });
 stick.addEventListener('pointermove', e => { if (stickV) moveStick(e); });
 const endStick = () => { stickV = null; stick.querySelector('i').style.transform = ''; };
-stick.addEventListener('pointerup', endStick); stick.addEventListener('pointercancel', endStick);
+stick.addEventListener('pointerup', endStick); stick.addEventListener('pointercancel', endStick); stick.addEventListener('lostpointercapture', endStick);
+addEventListener('blur', () => { endStick(); keys.clear(); pointers.clear(); });
+document.addEventListener('visibilitychange', () => { endStick(); keys.clear(); pointers.clear(); clock.getDelta(); });
 function moveStick(e) { const r = stick.getBoundingClientRect(); let x = (e.clientX - r.left - r.width / 2) / (r.width / 2), y = (e.clientY - r.top - r.height / 2) / (r.height / 2); const l = Math.hypot(x, y); if (l > 1) { x /= l; y /= l; } stickV = { x, y }; stick.querySelector('i').style.transform = `translate(${x * 33}px,${y * 33}px)`; }
 
 function act(a) {
@@ -1860,7 +1890,7 @@ function checkBells() {
 /* =========================================================
    main loop
    ========================================================= */
-let entered = false, running = true;
+let entered = false, running = true, lastFrame = 0;
 const clock = new THREE.Clock();
 const tmpV = new THREE.Vector3();
 function resolveCollisions(p) {
@@ -1941,12 +1971,18 @@ function update(dt, now) {
 function lerpAngle(a, b, t) { let d = ((b - a + Math.PI) % (Math.PI * 2)) - Math.PI; if (d < -Math.PI) d += Math.PI * 2; return a + d * t; }
 function loop(now) {
   if (!running) return; requestAnimationFrame(loop);
+  if (document.hidden) return;
+  if (settings.lite && now - lastFrame < 1000 / 30) return;
+  lastFrame = now;
   const dt = Math.min(.1, clock.getDelta());
   if (entered) update(dt, now); else { const t = now / 1000; camera.position.set(Math.sin(t * .05) * 3, 3.2, 15); camera.lookAt(0, 3.4, -18); }
   renderer.render(scene, camera);
 }
 function resize() { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); if ($('#rosary').classList.contains('open')) { rvLayout(); rvDraw(); } }
 addEventListener('resize', resize);
+window.visualViewport?.addEventListener('resize', resize);
+canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); toast('화면을 복구하고 있어요. 잠시 기다려 주세요.', 10000); });
+canvas.addEventListener('webglcontextrestored', () => { applyQuality(); resize(); toast('성당 화면을 복구했어요.'); });
 
 /* =========================================================
    boot
@@ -1956,9 +1992,15 @@ $('#room-label').textContent = '성전 ' + roomNo; refreshMe(); renderRooms(); r
 requestAnimationFrame(loop);
 window.__luxReady = true;
 setTimeout(() => { $('#enter').disabled = false; $('#enter-label').textContent = '눌러서 들어가기'; $('#loading-dot').remove(); }, 400);
-Net.join(roomNo);
+$('#status-chip').onclick=()=>{if(entered&&running){Net.join(roomNo);toast('다시 연결하고 있어요. 같은 성전 번호인지 확인해 주세요.');}};
+addEventListener('offline',()=>{if(!entered||!running)return;Net.leave();setNet('off');});
+addEventListener('online',()=>{if(entered&&running)Net.join(roomNo);});
+let hiddenAt=0;
+document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenAt=Date.now();}else if(entered&&running){if(!Net.room||Date.now()-hiddenAt>10000)Net.join(roomNo);else Net.tick(performance.now());}});
+addEventListener('pagehide',()=>Net.leave());
+addEventListener('pageshow',e=>{if(e.persisted&&entered&&running)Net.join(roomNo);});
 $('#enter').onclick = () => {
-  entered = true; $('#title').classList.add('gone'); ['#hud', '#actions'].forEach(s => $(s).hidden = false); $('#stick').classList.add('ready');
+  entered = true; Net.join(roomNo); $('#title').classList.add('gone'); ['#hud', '#actions'].forEach(s => $(s).hidden = false); $('#stick').classList.add('ready');
   Sound.init(); setTimeout(() => Sound.toll(1, 0, 174), 600);
   cam.yaw = 0; camera.position.set(0, 3.4, 23);
   const hint = $('#hint'); hint.textContent = isTouch ? '바닥을 눌러 이동 · 쓸어서 둘러보기 · 두 손가락으로 확대' : '바닥 클릭 · WASD로 이동 · 드래그로 둘러보기 · 휠로 확대'; hint.classList.add('show'); setTimeout(() => hint.classList.remove('show'), 6500);
