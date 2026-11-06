@@ -272,6 +272,17 @@ table.mass tr.today td{color:#fbe7c4}
 .title .maker-credit{display:block;margin-top:12px;color:#b8a58c;font-size:11px;letter-spacing:.12em;font-weight:500}
 @media(max-height:500px) and (orientation:landscape){.title .maker-credit{margin-top:4px;font-size:10px}}
 .appearance-option{display:flex;align-items:center;gap:9px;min-height:48px;margin-top:16px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;font-size:14px;cursor:pointer}.appearance-option input{width:20px;height:20px;accent-color:#e7b56a}.appearance-option small{color:var(--ink-dim)}.appearance-note{font-size:12px;line-height:1.7;color:var(--ink-dim)}
+
+/* Reconciliation chapel: no confession text is collected. */
+.confession-room{position:fixed;inset:0;z-index:60;background:rgba(9,6,9,.78);backdrop-filter:blur(7px);display:none;align-items:center;justify-content:center;padding:20px;overscroll-behavior:contain}
+.confession-room.open{display:flex}
+.cf-dialog{width:min(840px,100%);max-height:calc(100dvh - 40px);overflow:auto;border:1px solid #80674b;border-radius:24px;background:linear-gradient(135deg,#302031,#181210 65%);box-shadow:0 24px 90px #0009;color:#f5ead6;padding:30px;scrollbar-width:thin;overscroll-behavior:contain}
+.cf-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}.cf-head small{font-size:11px;letter-spacing:.16em;color:#dbc1a0}.cf-head h2{font:600 28px/1.5 var(--serif);margin:8px 0}.cf-head p{color:#d0c0af;font-size:13px;line-height:1.8;margin:0}.cf-close{flex-shrink:0;width:44px;height:44px;border-radius:50%;border:1px solid #8c7766;color:#f5ead6;font-size:24px}
+.cf-notice{font-size:12px;line-height:1.8;padding:12px 15px;margin:20px 0;background:#e7b56a10;border-left:2px solid #e7b56a;color:#e4d5c5}.cf-notice strong{color:#f1c88d}
+.cf-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:5px;background:#09060770;border-radius:14px;margin-bottom:22px}.cf-tabs button{padding:12px 4px;border-radius:10px;color:#d6c7b8;font-size:13px;min-height:44px}.cf-tabs button[aria-selected="true"]{background:#694b68;color:#fff4df;box-shadow:inset 0 0 0 1px #b298a6}
+.cf-content{min-height:265px}.cf-content h3{font:600 21px/1.6 var(--serif);margin:0 0 10px}.cf-content p{font-size:14px;line-height:1.9;color:#ded0c0}.cf-questions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}.cf-question{border:1px solid #665141;border-radius:14px;padding:15px;background:#ffffff04}.cf-question b{display:block;color:#ecc990;font-size:13px;margin-bottom:7px}.cf-question p{font-size:13px;margin:0}.cf-prayer{font:400 17px/2 var(--serif);padding:22px;border-radius:15px;background:#ffffff06;border:1px solid #665141;white-space:pre-line;color:#f3e4d1;margin:15px 0}.cf-small{font-size:12px!important;color:#c3b29f!important}.cf-list{padding-left:24px;margin:16px 0}.cf-list li{padding:6px 0 6px 7px;font-size:14px;line-height:1.9;color:#ded0c0}.cf-list b{color:#f2d3a5}.cf-foot{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;border-top:1px solid #665141;padding-top:18px;margin-top:22px}.cf-foot button,.cf-place{border:1px solid #80674b;border-radius:12px;min-height:44px;padding:10px 15px;color:#f5ead6;font-size:13px}.cf-foot .cf-next{background:#ddbb85;border-color:#ddbb85;color:#251b13}.cf-foot button:disabled{opacity:.35;cursor:default}.cf-sources{font-size:11px;color:#bdad9d;line-height:1.9;margin:20px 0 0}.cf-sources a{color:#e8ca9a;text-decoration:underline;text-underline-offset:3px}.cf-room-mark{display:inline-block;margin-right:9px;color:#e7b56a}.cf-dialog button:focus-visible,.cf-dialog a:focus-visible{outline:2px solid #efd19d;outline-offset:3px}
+@media(max-width:720px){.actions{grid-template-columns:repeat(7,minmax(0,1fr))}.actions button{font-size:9px}.confession-room{padding:8px}.cf-dialog{padding:20px 16px;max-height:calc(100dvh - 16px);border-radius:19px}.cf-head h2{font-size:24px}.cf-head p{font-size:12px}.cf-notice{margin:14px 0}.cf-tabs{gap:3px;margin-bottom:16px}.cf-tabs button{font-size:12px}.cf-questions{grid-template-columns:1fr}.cf-content{min-height:0}.cf-prayer{font-size:15px;padding:15px}.cf-foot{gap:7px}.cf-foot button{padding:9px 11px}.cf-foot .cf-place{width:100%}}
+
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 </head>
@@ -351,6 +362,7 @@ table.mass tr.today td{color:#fbe7c4}
   <button data-act="peace"><svg viewBox="0 0 24 24" class="i"><path d="M3.5 13.5c3.2.4 5.6-1 7.3-4.3.7 2.6 2.4 4.1 5.2 4.3l3.5-2.6-.9 3.6c-1.7 3.4-5.7 4.9-10 3.6l-3.1 2 .8-3.2c-1.6-.7-2.6-1.8-2.8-3.4Z"/></svg><span>평화의 인사</span><kbd>4</kbd></button>
   <button data-act="appearance" id="a-veil"><svg viewBox="0 0 24 24" class="i"><circle cx="12" cy="7" r="3.3"/><path d="M5 21v-3a7 7 0 0 1 14 0v3M9 14l3 3 3-3"/></svg><span>내 모습</span><kbd>5</kbd></button>
   <button data-act="worry"><svg viewBox="0 0 24 24" class="i"><path d="M4 14c2.5 0 4.5-1.4 6-4 .7 2 2.2 3.3 4.5 3.6L20 11l-1 3.4c-1.5 3-5 4.4-9 3.4L7 20l.6-3C5.4 16.4 4.3 15.4 4 14Z"/><path d="M12 3v3M9.2 4.4l1 1.8M14.8 4.4l-1 1.8"/></svg><span>마음 내려놓기</span><kbd>6</kbd></button>
+  <button data-act="confession" id="a-confession"><svg viewBox="0 0 24 24" class="i"><path d="M5 21V8l7-5 7 5v13M3 21h18M12 7v6M9 10h6M9 21v-5h6v5"/></svg><span>고해성사 준비</span><kbd>7</kbd></button>
 </nav>
 
 <!-- ============ SHEETS ============ -->
@@ -455,6 +467,19 @@ table.mass tr.today td{color:#fbe7c4}
 
 <!-- info card -->
 <div id="card" class="card" role="dialog"><button class="close" data-close aria-label="닫기">✕</button><small id="card-kicker"></small><h3 id="card-title"></h3><p id="card-body"></p><div class="btnrow" id="card-btns"></div></div>
+
+
+<!-- 고해성사 준비: 성사·고백·상담 서비스가 아닌 개인 성찰 안내 -->
+<section id="confession-room" class="confession-room" aria-hidden="true">
+ <div class="cf-dialog" role="dialog" aria-modal="true" aria-labelledby="cf-title" aria-describedby="cf-notice" tabindex="-1">
+  <header class="cf-head"><div><small><span class="cf-room-mark">✝</span> 화해를 준비하는 자리</small><h2 id="cf-title">고해성사 준비실</h2><p>성탄을 기다리며, 하느님께 돌아가는 작은 발걸음.<br>서두르지 말고 조용히 마음을 살펴보세요.</p></div><button id="cf-close" class="cf-close" aria-label="고해성사 준비실 닫기">×</button></header>
+  <div class="cf-notice" id="cf-notice"><strong>이곳에서는 고해성사나 사죄가 이루어지지 않습니다.</strong><br>실제 성사는 성당에서 사제를 직접 만나 받으세요. 죄를 적는 입력창·녹음·AI 고해 기능은 없으며, 성찰 내용은 수집하지 않습니다.</div>
+  <div class="cf-tabs" role="tablist" aria-label="고해성사 준비 단계"><button role="tab" id="cf-tab-0" data-cf-step="0" aria-controls="cf-content">1 성찰</button><button role="tab" id="cf-tab-1" data-cf-step="1" aria-controls="cf-content">2 통회기도</button><button role="tab" id="cf-tab-2" data-cf-step="2" aria-controls="cf-content">3 성사 순서</button><button role="tab" id="cf-tab-3" data-cf-step="3" aria-controls="cf-content">4 성탄 판공</button></div>
+  <div id="cf-content" class="cf-content" role="tabpanel" tabindex="0"></div>
+  <footer class="cf-foot"><button id="cf-place" class="cf-place">성당 안 고해소 앞으로</button><div style="display:flex;gap:8px"><button id="cf-prev">이전</button><button id="cf-next" class="cf-next">다음</button></div></footer>
+  <p class="cf-sources">안내 참고: <a href="https://maria.catholic.or.kr/mi_pr/sacrament/faq.asp?fgubun=4&page=1" target="_blank" rel="noopener noreferrer">가톨릭 굿뉴스 · 고해성사</a> · <a href="https://www.ap1.or.kr/prayer.php" target="_blank" rel="noopener noreferrer">압구정1동성당 · 기도문·성사 순서</a><br>비공식 기도 공간입니다. 특정 본당이나 교황청과 관계없으며, 미사와 성사를 대신하지 않습니다.</p>
+ </div>
+</section>
 
 <!-- rosary -->
 <section id="rosary" class="rosary" aria-label="묵주기도">
@@ -1078,6 +1103,11 @@ function confessional(x, z, face) {
   box(.9, 2.0, .04, M.woodDark, 0, 1.1, .02, { parent: g });
   for (let k = 0; k < 4; k++) box(.6, .04, .02, M.gold, 0, 1.4 + k * .12, .05, { parent: g, cast: false });
   for (const s of [-1, 1]) { const cu = new THREE.Mesh(new THREE.PlaneGeometry(.8, 1.9), MB.purple); cu.position.set(s * 1.0, 1.1, .02); g.add(cu); }
+  for(const xx of [-1.5,-.5,.5,1.5]){box(.09,2.6,.13,M.woodDark,xx,1.3,.08,{parent:g});box(.15,.08,.18,M.gold,xx,2.46,.1,{parent:g,cast:false});}
+  for(let k=0;k<6;k++)box(.025,.5,.025,M.gold,-.24+k*.095,1.58,.075,{parent:g,cast:false});
+  const signC=makeCanvas(512,160,(ctx,w,h)=>{ctx.fillStyle='#30202b';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#d9b77c';ctx.lineWidth=5;ctx.strokeRect(8,8,w-16,h-16);ctx.fillStyle='#f7dfb2';ctx.textAlign='center';ctx.font='600 54px "Noto Serif KR",serif';ctx.fillText('고해소',w/2,76);ctx.font='25px sans-serif';ctx.fillText('성찰 · 기도',w/2,124);});
+  const sign=new THREE.Mesh(new THREE.PlaneGeometry(1.45,.45),new THREE.MeshBasicMaterial({map:tex(signC),side:THREE.DoubleSide}));sign.position.set(0,2.75,.045);g.add(sign);
+  box(.85,.12,.38,MB.purple,1,.32,.55,{parent:g});box(.07,.28,.3,wd,.65,.14,.55,{parent:g});box(.07,.28,.3,wd,1.35,.14,.55,{parent:g});
   markPick(g, 'confession');
   const lx = face > 0 ? [x, x + 1.15] : [x - 1.15, x]; addCollider(lx[0], lx[1], z - 1.55, z + 1.55);
 }
@@ -1667,6 +1697,37 @@ function closeCard() { $('#card').classList.remove('open'); }
 /* =========================================================
    actions
    ========================================================= */
+
+/* CONFESSION_PREP_V1: no confession input, recording, AI dialogue or storage. */
+let cfStep = 0, cfReturnFocus = null;
+const cfPages = ["<h3>오늘, 내 마음은 어디에 있었나요?</h3><p>지난 고해성사 이후의 생활을 떠올려 보세요. 아래 질문은 성찰을 돕는 예시이며, 죄를 판정하거나 점수를 매기는 목록이 아닙니다.</p><div class=\"cf-questions\"><div class=\"cf-question\"><b>하느님과의 관계</b><p>기도와 주일 미사를 소홀히 하지는 않았나요? 하느님의 이름과 신앙을 존중했나요?</p></div><div class=\"cf-question\"><b>가까운 사람과의 관계</b><p>가족과 이웃에게 상처 주는 말이나 행동을 했나요? 사과하거나 돌봐야 할 사람을 외면했나요?</p></div><div class=\"cf-question\"><b>정직과 책임</b><p>거짓말, 험담, 부당한 이익으로 누군가에게 해를 끼쳤나요? 맡은 책임과 나눌 수 있는 선을 소홀히 했나요?</p></div><div class=\"cf-question\"><b>존엄과 사랑</b><p>나와 다른 사람의 생명·몸·인격을 귀하게 여겼나요? 탐욕과 시기, 미움에 머물지는 않았나요?</p></div></div><p class=\"cf-small\">답은 마음속으로만 떠올리세요. 자신을 몰아붙이기보다 하느님의 자비 안에서 정직하게 살피세요. 오래 쉬었거나 무엇을 말해야 할지 모르겠다면 사제에게 그대로 말씀드려도 됩니다.</p>","<h3>통회와 새로운 결심</h3><p>잘못을 진심으로 뉘우치고, 같은 잘못을 피하며 삶을 바꾸겠다는 마음을 모아 기도하세요.</p><div class=\"cf-prayer\">하느님,\n제가 죄를 지어\n참으로 사랑받으셔야 할\n주님의 마음을 아프게 하였사오니\n악을 저지르고 선을 소홀히 한 모든 잘못을\n진심으로 뉘우치나이다.\n또한 주님의 은총으로 속죄하고\n다시는 죄를 짓지 않으며\n죄지을 기회를 피하기로 굳게 다짐하오니\n우리 구세주 예수 그리스도의 수난 공로를 보시고\n저에게 자비를 베풀어주소서.\n아멘.</div><p class=\"cf-small\">기도문 참고: 압구정1동성당 주요기도문. 이 기도를 읽는 것만으로 고해성사를 받은 것은 아닙니다.</p>","<h3>실제 고해소에서는 이렇게 준비해요</h3><ol class=\"cf-list\"><li><b>들어가기 전</b><br>성찰하고 진심으로 뉘우치며, 다시 죄를 피하기로 결심합니다. 고백기도와 통회기도를 바칩니다.</li><li><b>사제와 성호경을 바치고 고백하기</b><br>마지막 고해성사 이후 얼마나 지났는지 말하고, 성찰한 자신의 죄를 정직하게 고백합니다. 순서를 잊었으면 도움을 청하세요.</li><li><b>권고와 보속을 듣기</b><br>사제의 권고와 정해 주시는 보속을 듣습니다. 필요한 경우 사제의 안내에 따라 통회기도를 바칩니다.</li><li><b>사죄경과 마침</b><br>사제의 사죄경에 응답하고, 성사를 마친 뒤 감사기도와 받은 보속을 실천합니다.</li></ol><p class=\"cf-small\">이 화면은 사전 안내입니다. 실제 예식에서는 사제의 안내를 따르세요. 앱이 사죄경을 읽거나 보속을 정하지 않습니다.</p>","<h3>성탄 판공성사, 미리 준비해요</h3><p>한국 천주교회는 성탄과 부활 시기에 판공성사를 마련합니다. 성탄을 앞두고 본당의 안내를 살펴보세요.</p><ol class=\"cf-list\"><li><b>소속 본당의 주보·홈페이지 확인</b><br>판공 기간, 고해성사 시간·장소는 본당마다 다릅니다. 이 사이트에서는 현재 일정을 확인하거나 예약하지 않습니다.</li><li><b>판공성사표와 확인 방법 문의</b><br>성사표 제출이나 확인이 필요한지는 소속 본당 사무실에 문의하세요. 이 앱은 판공 이수나 성사 여부를 기록하지 않습니다.</li><li><b>시간이 맞지 않거나 오랜만이라면</b><br>본당 사무실이나 사제에게 문의해 성사 가능 시간과 필요한 안내를 받으세요.</li><li><b>성사 후에도 이어 가기</b><br>받은 보속을 실천하고, 일상에서 화해와 사랑을 이어 가세요.</li></ol><p class=\"cf-small\">혼자 준비하기 어렵다면 “오랜만에 고해성사를 보러 왔습니다. 도와주세요.”라고 말씀드려 보세요.</p>"];
+function renderConfession(i) {
+ cfStep = clamp(i,0,3);
+ $$('[data-cf-step]').forEach((b,n)=>{b.setAttribute('aria-selected',String(n===cfStep)); b.tabIndex=n===cfStep?0:-1;});
+ const content=$('#cf-content'); content.innerHTML=cfPages[cfStep]; content.setAttribute('aria-labelledby','cf-tab-'+cfStep);
+ $('#cf-prev').disabled=cfStep===0; $('#cf-next').textContent=cfStep===3?'성당으로 돌아가기':'다음 ›';
+ const panel=$('.cf-dialog'); panel.scrollTop=0;
+}
+function openConfession(){
+ cfReturnFocus=document.activeElement; closeAll(); closeCard(); $('#worry').classList.remove('open'); $('#intent').classList.remove('open');
+ keys.clear(); player.path=[]; player.onArrive=null; $('#confession-room').classList.add('open'); $('#confession-room').setAttribute('aria-hidden','false');
+ renderConfession(0); $('#cf-close').focus();
+}
+function closeConfession(){
+ const el=$('#confession-room'); if(!el.classList.contains('open'))return; el.classList.remove('open'); el.setAttribute('aria-hidden','true'); keys.clear();
+ if(cfReturnFocus?.isConnected && cfReturnFocus!==document.body)cfReturnFocus.focus(); else $('#a-confession').focus();
+}
+$('#cf-close').onclick=closeConfession;
+$('#cf-prev').onclick=()=>{renderConfession(cfStep-1);$('#cf-tab-'+cfStep).focus();};
+$('#cf-next').onclick=()=>{if(cfStep===3){closeConfession();return;}renderConfession(cfStep+1);$('#cf-tab-'+cfStep).focus();};
+$$('[data-cf-step]').forEach(b=>{b.onclick=()=>renderConfession(+b.dataset.cfStep);b.onkeydown=e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const n=e.key==='Home'?0:e.key==='End'?3:(cfStep+(e.key==='ArrowRight'?1:3))%4;renderConfession(n);$('#cf-tab-'+n).focus();}};});
+$('#cf-place').onclick=()=>{
+ closeConfession(); walkTo(-9.6,9.8,()=>{player.yaw=-Math.PI/2;player.state='pray';setPrayLabel();caption('고해소 앞','조용히 성찰하며 기도하세요.<br>고해소를 누르면 성사 준비 안내를 다시 볼 수 있어요.',5500);});
+};
+$('#confession-room').addEventListener('keydown',e=>{
+ if(e.key==='Tab'){const list=$$('.cf-dialog button:not(:disabled), .cf-dialog a, #cf-content').filter(el=>el.tabIndex>=0);const first=list[0],last=list[list.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
+});
+
 function setPrayLabel() { const l = $('#a-pray-label'); l.textContent = player.seat ? (player.state === 'kneel' ? '일어나기' : '무릎 꿇기') : '기도'; $('#a-pray').classList.toggle('active', ['pray', 'kneel', 'sitpray'].includes(player.state)); }
 const PR = {
   cross: '성부와 성자와 성령의 이름으로. 아멘.',
@@ -1733,7 +1794,7 @@ function onPick(pk, point) {
     case 'joseph': openCard('오른편 제대', '성 요셉', '아기 예수님과 순결의 백합을 든, 성모님의 배필 성 요셉이에요. 교회와 가정, 노동자의 수호성인이에요.\n\n“성 요셉, 저희를 위하여 빌어주소서.”', [['성 요셉 앞으로 가기', () => { closeCard(); go(9.5, -9.75, Math.PI, doPray); }]]); break;
     case 'heart': openCard('왼편 회랑', '예수 성심', '사랑으로 불타는 마음을 드러내 보이신 예수님이에요. 6월은 예수 성심 성월이에요.\n\n“지극히 거룩하신 예수 성심이여, 저희를 불쌍히 여기소서.”', [['성심상 앞으로 가기', () => { closeCard(); go(-7.95, 2.45, -Math.PI * .75, doPray); }]]); break;
     case 'peter': openCard('오른편 회랑', '성 베드로 청동상', '성 베드로 대성전의 청동 좌상을 본떠 만들었어요. 순례자들이 발에 손을 얹고 기도해 온 까닭에, 실제 상의 오른발은 닳아서 반들반들해요.\n\n“너는 베드로이다. 내가 이 반석 위에 내 교회를 세울 터인즉…” (마태 16,18)', [['발에 손 얹고 기도하기', () => { closeCard(); go(8.3, -1.0, Math.PI / 2, () => { player.state = 'water'; player.anim = { kind: 'water', t: 0, dur: 2.4, then: () => { player.state = 'pray'; setPrayLabel(); } }; caption('성 베드로', '“성 베드로 사도여, 저희를 위하여 빌어주소서.”', 4500); }); }]]); break;
-    case 'confession': openCard('회랑', '고해소', '하느님과 화해하는 고해성사가 이루어지는 곳이에요. 실제 고해성사는 성당에서 사제를 통해서만 받을 수 있어요.\n여기서는 마음속 짐을 적어 금빛 비둘기로 날려 보낼 수 있어요.', [['마음 내려놓기', () => { closeCard(); openWorry(); }]]); break;
+    case 'confession': openConfession(); break;
     case 'baptism': openCard('입구 곁', '세례대', '세례성사로 하느님의 자녀로 새로 태어나는 곳이에요. 성당 입구 가까이 두어 신앙의 시작을 떠올리게 해요.', [['세례 때의 약속 떠올리며 기도하기', () => { closeCard(); go(-9.4, 14.9, 0, doPray); }]]); break;
     case 'tabernacle': openCard('제대 뒤', '감실과 성체등', '앱스의 높은 제대 위 금빛 감실은 성체가 모셔진 곳이에요. 곁의 붉은 성체등은 주님께서 계심을 알리며 늘 켜져 있어요.\n성당에 들어서면 감실을 향해 무릎을 꿇거나 깊이 고개 숙여 인사해요.', [['감실을 향해 절하기', () => { closeCard(); go(0, -10.9, Math.PI, bow); }]]); break;
     case 'rood': openCard('개선 아치 아래', '십자고상', '성당 어디에서든 바라볼 수 있도록 높이 걸린 십자고상이에요. 금테 두른 나무 십자가에 상아빛 예수님을 모셨어요.\n\n“주님, 저희를 불쌍히 여기소서.”', [['십자가 앞에서 기도하기', () => { closeCard(); go(0, -10.9, Math.PI, doPray); }]]); break;
@@ -1851,12 +1912,13 @@ canvas.addEventListener('pointerup', e => { const p = pointers.get(e.pointerId);
 canvas.addEventListener('pointercancel', e => pointers.delete(e.pointerId));
 canvas.addEventListener('wheel', e => { e.preventDefault(); cam.dist = clamp(cam.dist * (1 + Math.sign(e.deltaY) * .1), 2.2, 16); }, { passive: false });
 addEventListener('keydown', e => {
+  if ($('#confession-room').classList.contains('open')) { if (e.key === 'Escape') { e.preventDefault(); closeConfession(); } return; }
   if (e.target.matches('input, textarea')) return;
   if ($('#rosary').classList.contains('open')) { if ([' ', 'ArrowRight', 'ArrowDown', 'Enter'].includes(e.key)) { e.preventDefault(); rvNext(); } if (['ArrowLeft', 'ArrowUp'].includes(e.key)) rvPrev(); if (e.key === 'Escape') closeRosary(); return; }
   const k = e.key.toLowerCase();
   if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) { keys.add(k); e.preventDefault(); return; }
   if (k === 'escape') { closeAll(); closeCard(); $('#worry').classList.remove('open'); $('#intent').classList.remove('open'); return; }
-  const map = { '1': 'pray', ' ': 'pray', 'e': 'pray', '2': 'candle', '3': 'rosary', '4': 'peace', '5': 'appearance', '6': 'worry' };
+  const map = { '1': 'pray', ' ': 'pray', 'e': 'pray', '2': 'candle', '3': 'rosary', '4': 'peace', '5': 'appearance', '6': 'worry', '7': 'confession' };
   if (map[k] && !e.repeat) { e.preventDefault(); act(map[k]); }
 });
 addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
@@ -1874,7 +1936,7 @@ function moveStick(e) { const r = stick.getBoundingClientRect(); let x = (e.clie
 function act(a) {
   if (!entered) return;
   if (a !== 'candle') { $('#intent').classList.remove('open'); }
-  switch (a) { case 'pray': doPray(); break; case 'candle': startCandle(); break; case 'rosary': openRosary(); break; case 'peace': doPeace(); break; case 'appearance': togglePanel('sheet-room'); break; case 'veil': doVeil(); break; case 'worry': openWorry(); break; }
+  switch (a) { case 'pray': doPray(); break; case 'candle': startCandle(); break; case 'rosary': openRosary(); break; case 'peace': doPeace(); break; case 'appearance': togglePanel('sheet-room'); break; case 'veil': doVeil(); break; case 'worry': openWorry(); break; case 'confession': openConfession(); break; }
 }
 $$('#actions button').forEach(b => b.onclick = () => act(b.dataset.act));
 
